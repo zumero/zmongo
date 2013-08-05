@@ -1,0 +1,42 @@
+<div class='index'>
+
+<ul>
+<li><a href="#struct-mongosclient">Struct <code>MongosClient</code></a> - A shard controller</li>
+<li><a href="#implementation-for-mongosclient">Implementation <code>for MongosClient</code></a></li>
+</ul>
+</div>
+
+<h2 id="struct-mongosclient">Struct <code>MongosClient</code></h2>
+<pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">pub</span> <span class="kw">struct</span> MongosClient {
+    mongos: @Client,
+}</code></pre>
+<p>A shard controller. An instance of this wraps a Client connection to a mongos instance.</p>
+<h2 id="implementation-for-mongosclient">Implementation for <code>MongosClient</code></h2>
+<h3 id="method-new">Method <code>new</code></h3>
+<pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> new(client: @Client) -&gt; MongosClient</code></pre>
+<p>Create a new MongosClient. Will fail if the given Client is not connected to a mongos instance.</p>
+<h3 id="method-enable_sharding">Method <code>enable_sharding</code></h3>
+<pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> enable_sharding(&amp;<span class="kw">self</span>, db: ~<span class="kw">str</span>) -&gt; <span class="kw">Result</span>&lt;(), MongoErr&gt;</code></pre>
+<p>Enable sharding on the specified database. The database must exist or this operation will fail.</p>
+<h3 id="method-list_shards">Method <code>list_shards</code></h3>
+<pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> list_shards(&amp;<span class="kw">self</span>) -&gt; <span class="kw">Result</span>&lt;~BsonDocument, MongoErr&gt;</code></pre>
+<p>Return a list of all shards on the current cluster.</p>
+<h3 id="method-add_shard">Method <code>add_shard</code></h3>
+<pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> add_shard(&amp;<span class="kw">self</span>, hostname: ~<span class="kw">str</span>) -&gt; <span class="kw">Result</span>&lt;(), MongoErr&gt;</code></pre>
+<p>Allow this shard controller to manage a new shard. Hostname can be in a variety of formats: * <hostname> * <hostname>:<port> * <replset>/<hostname> * <replset>/<hostname>:port</p>
+<h3 id="method-remove_shard">Method <code>remove_shard</code></h3>
+<pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> remove_shard(&amp;<span class="kw">self</span>, shardname: ~<span class="kw">str</span>) -&gt; <span class="kw">Result</span>&lt;~BsonDocument, MongoErr&gt;</code></pre>
+<p>Begins removing a shard from this cluster. If called while a shard is being removed, will instead return a document describing the current removal status.</p>
+<h3 id="method-shard_collection">Method <code>shard_collection</code></h3>
+<pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> shard_collection(&amp;<span class="kw">self</span>, db: ~<span class="kw">str</span>, coll: ~<span class="kw">str</span>, key: QuerySpec, unique: <span class="kw">bool</span>)
+ -&gt; <span class="kw">Result</span>&lt;(), MongoErr&gt;</code></pre>
+<p>Enable sharding on the specified collection.</p>
+<h3 id="method-status">Method <code>status</code></h3>
+<pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> status(&amp;<span class="kw">self</span>) -&gt; <span class="kw">Result</span>&lt;~<span class="kw">str</span>, MongoErr&gt;</code></pre>
+<p>Display the status of the current cluster. Equivalent to running sh.status() in shell.</p>
+<h3 id="method-add_shard_tag">Method <code>add_shard_tag</code></h3>
+<pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> add_shard_tag(&amp;<span class="kw">self</span>, shard: ~<span class="kw">str</span>, tag: ~<span class="kw">str</span>) -&gt; <span class="kw">Result</span>&lt;(), MongoErr&gt;</code></pre>
+<p>Add a tag to the given shard. Requires MongoDB 2.2 or higher.</p>
+<h3 id="method-remove_shard_tag">Method <code>remove_shard_tag</code></h3>
+<pre class="sourceCode rust"><code class="sourceCode rust"><span class="kw">fn</span> remove_shard_tag(&amp;<span class="kw">self</span>, shard: ~<span class="kw">str</span>, tag: ~<span class="kw">str</span>) -&gt; <span class="kw">Result</span>&lt;(), MongoErr&gt;</code></pre>
+<p>Remove a tag from the given shard. Requires MongoDB 2.2 or higher.</p>
