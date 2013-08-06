@@ -1,8 +1,7 @@
 MongoDB Rust Driver Prototype
 =============================
 
-This is a prototype version of a MongoDB driver for the Rust programming language.
-This library has been built on Rust version 0.7. If you are using a more up-to-date version of Rust, the project may not build correctly.
+This is a prototype driver for MongoDB written in Rust. The API and implementation are currently subject to change at any time. You must not use this driver in production as it is still under development and is in no way supported by 10gen. We absolutely encourage you to experiment with it and provide us feedback on the API, design, and implementation. Bug reports and suggestions for improvements are welcomed, as are pull requests.
 
 ## Installation
 
@@ -10,9 +9,10 @@ This library has been built on Rust version 0.7. If you are using a more up-to-d
 - [Rust](http://rust-lang.org) 0.7 (WARNING: will likely not build on other versions)
 - [gcc](http://gcc.gnu.org)
 - [GNU Make](http://gnu.org/software/make)
+- [Pandoc](http://johnmcfarlane.net/pandoc) for building documentation
 
 #### Documentation
-Please find documentation in the docs folder; BSON library documentation can be found [here](https://github.com/10gen-interns/mongo-rust-driver-prototype/tree/master/docs/bson) and Mongo library documentation can be found [here](https://github.com/10gen-interns/mongo-rust-driver-prototype/tree/master/docs/mongo). Documentation is built using rustdoc (please run ```make doc```).
+Please find documentation in the [docs](https://github.com/10gen-interns/mongo-rust-driver-prototype/tree/master/docs/) folder. Documentation is built using rustdoc (please run ```make doc```).
 
 #### Building
 The Rust MongoDB driver is built using ```make```. Available targets include:
@@ -20,6 +20,7 @@ The Rust MongoDB driver is built using ```make```. Available targets include:
 - ```libs``` compile C dependencies
 - ```bson``` build a binary just for ```bson```
 - ```mongo``` build a binary just for ```mongo``` (note: this requires an existing ```bson``` binary)
+- ```gridfs``` builds a binary just for ```gridfs``` (note: this requires an existing ```bson``` and ```mongo``` binary)
 - ```test``` compile the test suite
 - ```check``` compile and run the test suite
 - ```doc``` generate documentation
@@ -249,7 +250,7 @@ Example:
 ```rust
 use bson::json_parse::*;
 
-let json_string = ~"{\"foo\": \"bar\", \"baz\", 5}";
+let json_string = ~"{\"foo\": \"bar\", \"baz\": 5}";
 let parsed_doc = ObjParser::from_string<Document, ExtendedJsonParser<~[char]>>(json_string);
 match parsed_doc {
     Ok(ref d) => //the string was parsed successfully; d is a Document
@@ -278,7 +279,7 @@ impl BsonFormattable for Foo {
         //the names of the fields in a Foo to their values
     }
 
-    fn from_bson_t(doc: Document) -> Foo {
+    fn from_bson_t(doc: &Document) -> Foo {
         //this method is the inverse of to_bson_t,
         //in general it makes sense for the two of them to roundtrip
     }
@@ -320,8 +321,8 @@ impl BsonFormattable for Foo {
     ...
 }
 
-let b: ~[u8] = /*get a bson document from somewhere*/
-let myfoo = BsonFormattable::from_bson_t::<Foo>(Embedded(~decode(b).unwrap()));
+let b: ~[u8] = /*get a bson string from somewhere*/
+let myfoo = BsonFormattable::from_bson_t::<Foo>(&Embedded(~decode(b).unwrap()));
 //here it is assumed b was decoded successfully, though a match could be done
 //the Embedded constructor is needed because decode returns a BsonDocument,
 //while from_bson_t expects a document
@@ -330,8 +331,6 @@ let myfoo = BsonFormattable::from_bson_t::<Foo>(Embedded(~decode(b).unwrap()));
 
 ## Roadmap
 
-- Replication set support
-- Implement read preferences
 - Documentation to the [API site](http://api.mongodb.org)
 - Thorough test suite for CRUD functionality
 

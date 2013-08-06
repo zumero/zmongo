@@ -14,21 +14,22 @@
  */
 
 use std::num::*;
+use std::cell::*;
 
 use bson::encode::*;
 
 use util::*;
 use msg::*;
+use index::*;
 use client::Client;
 use coll::Collection;
-use coll::MongoIndex;
 
 ///Structure representing a cursor
 pub struct Cursor {
     priv id : Option<i64>,                  // id on server (None->not yet queried, 0->closed)
     priv db: ~str,                          // name of DB associated with Cursor
     priv coll: ~str,                        // name of Collection associated with Cursor
-    priv client: @Client,                   // Client (+Connection) associated with Cursor
+    priv client: @Client,             // Client (+Connection) associated with Cursor
     flags : i32,                            // QUERY_FLAGs
     batch_size : i32,                       // size of batch in cursor fetch, may be modified
     query_spec : BsonDocument,              // query, may be modified
@@ -39,7 +40,7 @@ pub struct Cursor {
     priv skip : i32,                        // number to skip, specify before first "next"
     priv limit : i32,                       // max to return, specify before first "next"
     priv data : ~[~BsonDocument],           // docs stored in cursor
-    priv i : i32,                           // i64? index within data currently held
+    priv done : Cell<bool>,                 // whether [just] finished popping
 }
 
 ///Iterator implementation, opens access to powerful functions like collect, advance, map, etc.
@@ -58,8 +59,7 @@ impl Iterator<~BsonDocument> for Cursor {
         if self.refresh() == 0 {
             return None;
         }
-        self.i = self.i + 1;
-        Some(copy self.data[self.i-1])
+        Some(self.data.pop())
     }
 }
 
@@ -90,8 +90,8 @@ impl Cursor {
                     flags : i32) -> Cursor {
         Cursor {
             id: None,
-            db: copy collection.db,
-            coll: copy collection.name,
+            db: collection.db.clone(),
+            coll: collection.name.clone(),
             client: client,
             flags: flags,
             batch_size: 0,
@@ -103,13 +103,13 @@ impl Cursor {
             skip: 0,
             limit: 0,
             data: ~[],
-            i: 0,
+            done: Cell::new(false),
         }
     }
 
     /**
      * Actual function used to refresh `Cursor` and iterate.
-     * Any errors go into iter_eff field of `Cursor`.
+     * Any errors go into iter_err field of `Cursor`.
      *
      * # Returns
      * amount left in what's currently held by `Cursor`
@@ -122,22 +122,25 @@ impl Cursor {
         if self.id.is_none() {
             let msg = mk_query(
                             self.client.inc_requestId(),
-                            &self.db,
-                            &self.coll,
+                            self.db.as_slice(),
+                            self.coll.as_slice(),
                             self.flags,
                             self.skip,
                             self.batch_size,
                             copy self.query_spec,
                             copy self.proj_spec);
-            match self.client._send_msg(msg_to_bytes(msg), (&self.db, None), true) {
+            match self.client._send_msg(msg_to_bytes(&msg), (self.db.clone(), None), true) {
                 Ok(reply) => match reply {
                     Some(r) => match copy r {
                         // XXX check if need start
                         OpReply { header:_, flags:_, cursor_id:id, start:_, nret:n, docs:d } => {
                             self.id = Some(id);
                             self.retrieved = n;
-                            self.data = d;
-                            self.i = 0;
+                            let mut d_tmp = d;
+                            d_tmp.reverse();
+                            self.data = d_tmp;
+                            if !self.done.is_empty() { self.done.take(); }
+                            self.done.put_back(false);
 
                             return n;
                         }
@@ -167,23 +170,23 @@ impl Cursor {
             let diff = self.limit - self.retrieved;
             if diff > 0 { return diff; }
         }
-        if self.i < self.data.len() as i32 {
+        if self.data.len() > 0 {
             // has_next *within* cursor, so don't get_more
-            return (self.data.len() as i32) - self.i;
+            return self.data.len() as i32;
         }
 
         // otherwise, no more within cursor, so see if can get_more
-        let cur_id = (copy self.id).unwrap();
+        let cur_id = self.id.clone().unwrap();
         if cur_id == 0 {
-
             // exhausted cursor; return
-            if self.i > self.data.len() as i32 {
+            if self.done.take() {
                 // only if cursor exhausted "abnormally", set iter_err
                 self.iter_err = Some(MongoErr::new(
                                         ~"cursor::refresh",
                                         ~"querying on closed cursor",
                                         ~"cannot query on closed cursor"));
             }
+            self.done.put_back(true);
             return 0;
         }
 
@@ -199,11 +202,11 @@ impl Cursor {
         // otherwise, get_more
         let msg = mk_get_more(
                             self.client.inc_requestId(),
-                            &self.db,
-                            &self.coll,
+                            self.db.as_slice(),
+                            self.coll.as_slice(),
                             self.batch_size,
                             cur_id);
-        match self.client._send_msg(msg_to_bytes(msg), (&self.db, None), true) {
+        match self.client._send_msg(msg_to_bytes(&msg), (self.db.clone(), None), true) {
             Ok(reply) => match reply {
                 Some(r) => match copy r {
                     // TODO check re: start
@@ -214,8 +217,11 @@ impl Cursor {
                         // also update this cursor's fields
                         self.id = Some(id);
                         self.retrieved = self.retrieved + n;
-                        self.data = d;
-                        self.i = 0;
+                        let mut d_tmp = d;
+                        d_tmp.reverse();
+                        self.data = d_tmp;
+                        if !self.done.is_empty() { self.done.take(); }
+                        self.done.put_back(false);
 
                         return n;
                     }
@@ -279,7 +285,7 @@ impl Cursor {
         self.limit = limit;
 
         // also fix batch_size if needed
-        if self.batch_size == 0 || self.batch_size > abs(limit) {
+        if self.batch_size == 0 || self.batch_size > abs(limit as int) as i32 {
             self.batch_size = limit;
         }
         Ok(())
@@ -297,7 +303,7 @@ impl Cursor {
      */
     pub fn explain(&mut self) -> Result<~BsonDocument, MongoErr> {
         let mut query = copy self.query_spec;
-        query.append(~"$explain", Double(1f64));
+        query.put(~"$explain", Double(1f64));
         let mut tmp_cur = Cursor::new(  query, copy self.proj_spec,
                                         &Collection::new(   copy self.db,
                                                             copy self.coll,
@@ -319,11 +325,13 @@ impl Cursor {
      *
      * # Arguments
      * * `index` -  `MongoIndexName(name)` of index to use (if named),
-     *              `MongoIndexFields(~[INDEX_FIELD])` to fully specify
-     *                  index from scratch
+     *              `MongoIndexFields(~[INDEX_TYPE])` to specify index
+     *                  from fields
+     *              `MongoIndex(full index)` to specify index fully,
+     *                  e.g. as returned from database
      */
-    pub fn hint(&mut self, index : MongoIndex) {
-        self.query_spec.append(~"$hint", UString(index.get_name()));
+    pub fn hint(&mut self, index : MongoIndexSpec) {
+        self.query_spec.put(~"$hint", UString(index.get_name()));
     }
 
     /**
@@ -339,12 +347,12 @@ impl Cursor {
      * # Failure Types
      * * invalid sorting specification (`orderby`)
      */
-    pub fn sort(&mut self, orderby : INDEX_FIELD) -> Result<(), MongoErr> {
+    pub fn sort(&mut self, orderby : INDEX_TYPE) -> Result<(), MongoErr> {
         let mut spec = BsonDocument::new();
         match orderby {
             NORMAL(fields) => {
                 for fields.iter().advance |&(k,v)| {
-                    spec.append(k, Int32(v as i32));
+                    spec.put(k, Int32(v as i32));
                 }
             },
             _ => return Err(MongoErr::new(
@@ -352,7 +360,7 @@ impl Cursor {
                                 ~"invalid orderby specification",
                                 ~"only fields and their orders allowed")),
         }
-        self.query_spec.append(~"$orderby", Embedded(~spec));
+        self.query_spec.put(~"$orderby", Embedded(~spec));
         Ok(())
     }
 
@@ -399,13 +407,10 @@ impl Cursor {
      * Considers the last element of a `Cursor` to be `None`, hence
      * returns `true` at edge case when `Cursor` exhausted naturally.
      */
-    pub fn has_next(&self) -> bool {
+    pub fn has_next(&mut self) -> bool {
         // return true even if right at end (normal exhaustion of cursor)
-        if self.limit != 0 {
-            let diff = self.limit - self.retrieved;
-            if diff >= 0 { return true; }
-        }
-        self.i <= self.data.len() as i32
+        if self.limit != 0 && self.limit >= self.retrieved { true }
+        else { self.refresh() != 0 }
     }
 
     /**
@@ -432,7 +437,7 @@ impl Cursor {
                             self.client.inc_requestId(),
                             1i32,
                             ~[cur_id]);
-        let error = match self.client._send_msg(msg_to_bytes(kill_msg), (&self.db, Some(~[W_N(0)])), false) {
+        let error = match self.client._send_msg(msg_to_bytes(&kill_msg), (self.db.clone(), Some(~[W_N(0)])), false) {
             Ok(reply) => match reply {
                 Some(r) => Some(MongoErr::new(
                                 ~"cursor::close",

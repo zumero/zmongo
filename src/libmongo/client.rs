@@ -13,15 +13,21 @@
  * limitations under the License.
  */
 
-use std::*;
+use std::cell::*;
+use sys = std::sys;
+use std::from_str::FromStr;
 
 use bson::encode::*;
+use bson::formattable::*;
 
 use util::*;
 use msg::*;
-use conn::*;
+use conn::Connection;
+use conn_node::NodeConnection;
+use conn_replica::ReplicaSetConnection;
 use db::DB;
 use coll::Collection;
+use rs::RSConfig;
 
 /**
  * User interfaces with `Client`, which processes user requests
@@ -31,8 +37,10 @@ use coll::Collection;
  * `Collection`, etc. all store their associated `Client`
  */
 pub struct Client {
-    conn : ~cell::Cell<NodeConnection>,
-    priv cur_requestId : ~cell::Cell<i32>,      // first unused requestId
+    conn : Cell<@Connection>,
+    timeout : u64,
+    priv rs_conn : Cell<@ReplicaSetConnection>,
+    priv cur_requestId : Cell<i32>,     // first unused requestId
     // XXX index cache?
 }
 
@@ -41,17 +49,25 @@ impl Client {
      * Creates a new Mongo client.
      *
      * Currently can connect to single unreplicated, unsharded
-     * server via `connect`.
+     * server via `connect`, or to a replica set via `connect_to_rs`
+     * (given a seed, if already initiated), or via `initiate_rs`
+     * (given a configuration and single host, if not yet initiated).
      *
      * # Returns
      * empty `Client`
      */
     pub fn new() -> Client {
         Client {
-            conn : ~cell::Cell::new_empty(),
-            cur_requestId : ~cell::Cell::new(0),
+            conn : Cell::new_empty(),
+            timeout : MONGO_TIMEOUT_SECS,
+            rs_conn : Cell::new_empty(),
+            cur_requestId : Cell::new(0),
         }
     }
+
+    /*pub fn parse_uri(uri : ~str) {
+        // XXX
+    }*/
 
     pub fn get_admin(@self) -> DB {
         DB::new(~"admin", self)
@@ -153,8 +169,8 @@ impl Client {
      * # Failure Types
      * * anything propagated from run_command
      */
-    pub fn drop_db(@self, db : ~str) -> Result<(), MongoErr> {
-        let db = DB::new(db, self);
+    pub fn drop_db(@self, db : &str) -> Result<(), MongoErr> {
+        let db = DB::new(db.to_owned(), self);
         match db.run_command(SpecNotation(~"{ \"dropDatabase\":1 }")) {
             Ok(_) => Ok(()),
             Err(e) => Err(e),
@@ -177,6 +193,32 @@ impl Client {
         Collection::new(db, coll, self)
     }
 
+    /*
+     * Helper function for connections.
+     */
+    pub fn _connect_to_conn(&self, call : &str, conn : @Connection)
+                -> Result<(), MongoErr> {
+        // check if already connected
+        if !self.conn.is_empty() {
+            return Err(MongoErr::new(
+                            call.to_owned(),
+                            ~"already connected",
+                            ~"cannot connect if already connected; please first disconnect"));
+        }
+
+        // otherwise, make connection and connect to it
+        match conn.connect() {
+            Ok(_) => {
+                self.conn.put_back(conn);
+                Ok(())
+            }
+            Err(e) => return Err(MongoErr::new(
+                                    call.to_owned(),
+                                    ~"connecting",
+                                    fmt!("-->\n%s", e.to_str()))),
+        }
+    }
+
     /**
      * Connects to a single server.
      *
@@ -191,32 +233,107 @@ impl Client {
      * * already connected
      * * network
      */
-    pub fn connect(&self, server_ip_str : ~str, server_port : uint)
+    pub fn connect(&self, server_ip_str : &str, server_port : uint)
                 -> Result<(), MongoErr> {
-        // check if already connected
-        if !self.conn.is_empty() {
-            return Err(MongoErr::new(
-                            ~"client::connect",
-                            ~"already connected",
-                            ~"cannot connect if already connected; please first disconnect"));
+        let tmp = @NodeConnection::new(server_ip_str, server_port);
+        tmp.set_timeout(self.timeout);
+        self._connect_to_conn(  fmt!("client::connect[%s:%?]", server_ip_str, server_port),
+                                tmp as @Connection)
+    }
+
+    /**
+     * Connect to replica set with specified seed list.
+     *
+     * # Arguments
+     * `seed` - seed list (vector) of ip/port pairs
+     *
+     * # Returns
+     * () on success, MongoErr on failure
+     */
+    pub fn connect_to_rs(&self, seed : &[(~str, uint)])
+                -> Result<(), MongoErr> {
+        let tmp = @ReplicaSetConnection::new(seed);
+        tmp.set_timeout(self.timeout);
+        self.rs_conn.put_back(tmp);
+        self._connect_to_conn(  fmt!("client::connect_to_rs[%?]", seed),
+                                tmp as @Connection)
+    }
+
+    /**
+     * Initiates given configuration specified as `RSConfig`, and connects
+     * to the replica set.
+     *
+     * # Arguments
+     * * `via` - host to connect to in order to initiate the set
+     * * `conf` - configuration to initiate
+     *
+     * # Returns
+     * () on success, MongoErr on failure
+     */
+    pub fn initiate_rs(@self, via : (&str, uint), conf : RSConfig)
+                -> Result<(), MongoErr> {
+        let (ip, port) = via;
+        match self.connect(ip, port) {
+            Ok(_) => (),
+            Err(e) => return Err(e),
         }
 
-        // otherwise, make connection and connect to it
-        let tmp = NodeConnection::new(server_ip_str, server_port);
-        match tmp.connect() {
-            Ok(_) => {
-                self.conn.put_back(tmp);
-                Ok(())
+        let conf_doc = conf.to_bson_t();
+        let db = self.get_admin();
+        let mut cmd_doc = BsonDocument::new();
+        cmd_doc.put(~"replSetInitiate", conf_doc);
+        match db.run_command(SpecObj(cmd_doc)) {
+            Ok(_) => (),
+            Err(e) => return Err(e),
+        }
+
+        self.disconnect();
+
+        let mut seed = ~[];
+        for conf.members.iter().advance |&member| {
+            match parse_host(&member.host) {
+                Ok(p) => seed.push(p),
+                Err(e) => return Err(e),
             }
-            Err(e) => return Err(MongoErr::new(
-                                    ~"client::connect",
-                                    ~"connecting",
-                                    fmt!("-->\n%s", e.to_str()))),
+        }
+
+        match self.connect_to_rs(seed) {
+            Ok(_) => Ok(()),
+            Err(e) => Err(e),
         }
     }
 
     /**
-     * Disconnects from server.
+     * Sets read preference as specified, returning former preference.
+     *
+     * # Arguments
+     * * `np` - new read preference
+     *
+     * # Returns
+     * old read preference on success, MongoErr on failure
+     */
+    pub fn set_read_pref(&self, np : READ_PREFERENCE)
+                -> Result<READ_PREFERENCE, MongoErr> {
+        if self.rs_conn.is_empty() {
+            return Err(MongoErr::new(
+                            ~"client::set_read_pref",
+                            ~"could not set read preference",
+                            ~"connection not to replica set"));
+        }
+        let rs = self.rs_conn.take();
+        // read_pref and read_pref_changed should never be empty
+        let op = rs.read_pref.take();
+        rs.read_pref_changed.take();
+        // might as well only note updated if actually changed
+        rs.read_pref_changed.put_back( if op == np { false } else { true });
+        rs.read_pref.put_back(np);
+        // put everything back
+        self.rs_conn.put_back(rs);
+        Ok(op)
+    }
+
+    /**
+     * Disconnect from server.
      * Simultaneously empties connection cell.
      *
      * # Returns
@@ -226,7 +343,20 @@ impl Client {
      * * network
      */
     pub fn disconnect(&self) -> Result<(), MongoErr> {
+        if !self.rs_conn.is_empty() { self.rs_conn.take(); }
         if !self.conn.is_empty() { self.conn.take().disconnect() }
+        // XXX currently succeeds even if not previously connected
+        //      (may or may not be desired)
+        else { Ok(()) }
+    }
+
+    pub fn reconnect(&self) -> Result<(), MongoErr> {
+        if !self.conn.is_empty() {
+            let tmp = self.conn.take();
+            let result = tmp.reconnect();
+            self.conn.put_back(tmp);
+            result
+        }
         // XXX currently succeeds even if not previously connected
         //      (may or may not be desired)
         else { Ok(()) }
@@ -239,8 +369,8 @@ impl Client {
      * # Arguments
      * * `msg` - bytes to send
      * * `wc` - write concern (if applicable)
-     * * `auto_get_reply` - whether `Client` should expect an `OP_REPLY`
-     *                      from the server
+     * * `read` - whether read operation; whether `Client` should
+     *                      expect an `OP_REPLY` from the server
      *
      * # Returns
      * if read operation, `OP_REPLY` on success, `MongoErr` on failure;
@@ -249,11 +379,11 @@ impl Client {
      */
     // TODO check_primary for replication purposes?
     pub fn _send_msg(@self, msg : ~[u8],
-                            wc_pair : (&~str, Option<~[WRITE_CONCERN]>),
-                            auto_get_reply : bool)
+                            wc_pair : (~str, Option<~[WRITE_CONCERN]>),
+                            read : bool)
                 -> Result<Option<ServerMsg>, MongoErr> {
         // first send message, exiting if network error
-        match self.send(msg) {
+        match self.send(msg, read) {
             Ok(_) => (),
             Err(e) => return Err(MongoErr::new(
                                     ~"client::_send_msg",
@@ -262,10 +392,10 @@ impl Client {
         }
 
         // handle write concern or handle query as appropriate
-        if !auto_get_reply {
+        if !read {
             // requested write concern
             let (db_str, wc) = wc_pair;
-            let db = DB::new(copy *db_str, self);
+            let db = DB::new(db_str, self);
 
             match db.get_last_error(wc) {
                 Ok(_) => Ok(None),
@@ -276,7 +406,7 @@ impl Client {
             }
         } else {
             // requested query
-            match self._recv_msg() {
+            match self._recv_msg(read) {
                 Ok(m) => Ok(Some(m)),
                 Err(e) => Err(MongoErr::new(
                                     ~"client::_send_msg",
@@ -297,15 +427,58 @@ impl Client {
      * * server returned message with error flags
      * * network
      */
-    fn _recv_msg(&self) -> Result<ServerMsg, MongoErr> {
+    fn _recv_msg(&self, read : bool) -> Result<ServerMsg, MongoErr> {
+        /* BEGIN BLOCK to remove with new io */
+        let mut bytes = ~[];
+        let header_sz = 4*sys::size_of::<i32>();
         // receive message
-        let m = match self.recv() {
-            Ok(bytes) => match parse_reply(bytes) {
-                Ok(m_tmp) => m_tmp,
-                Err(e) => return Err(e),
-            },
+        let m = match self.recv(&mut bytes, read) {
+            Ok(_) => {
+                if bytes.len() < header_sz {
+                    return Err(MongoErr::new(
+                                ~"client::_recv_msg",
+                                ~"too few bytes in resp",
+                                fmt!("expected %?, received %?",
+                                        header_sz,
+                                        bytes.len())));
+                }
+                // first get header
+                let header_bytes = bytes.slice(0, header_sz);
+                let h = match parse_header(header_bytes) {
+                    Ok(head) => head,
+                    Err(e) => return Err(e),
+                };
+                // now get rest of message
+                let body_bytes = bytes.slice(header_sz, bytes.len());
+                match parse_reply(h, body_bytes) {
+                    Ok(m_tmp) => m_tmp,
+                    Err(e) => return Err(e),
+                }
+            }
             Err(e) => return Err(e),
         };
+        /* BEGIN BLOCK to remove with new io */
+
+        /* BEGIN BLOCK to add with new io */
+        /*// receive header
+        let header_sz = 4*sys::size_of::<i32>();
+        let mut buf : ~[u8] = ~[];
+        for header_sz.times { buf.push(0); }
+        self.recv(buf, read);
+        let header = match parse_header(buf) {
+            Ok(h) => h,
+            Err(e) => return Err(e),
+        };
+
+        // receive rest of message
+        buf = ~[];
+        for (header.len as uint-header_sz).times { buf.push(0); }
+        self.recv(buf, read);
+        let m = match parse_reply(header, buf) {
+            Ok(m_tmp) => m_tmp,
+            Err(e) => return Err(e),
+        };*/
+        /* END BLOCK to add with new io */
 
         // check if any errors in response and convert to MongoErr,
         //      else pass along
@@ -340,7 +513,7 @@ impl Client {
      * * not connected
      * * network
      */
-    pub fn send(&self, bytes : ~[u8]) -> Result<(), MongoErr> {
+    fn send(&self, bytes : ~[u8], read : bool) -> Result<(), MongoErr> {
         if self.conn.is_empty() {
             Err(MongoErr::new(
                     ~"client::send",
@@ -348,7 +521,7 @@ impl Client {
                     ~"attempted to send on nonexistent connection"))
         } else {
             let tmp = self.conn.take();
-            let result = tmp.send(bytes);
+            let result = tmp.send(bytes, read);
             self.conn.put_back(tmp);
             result
         }
@@ -364,7 +537,8 @@ impl Client {
      * * not connected
      * * network
      */
-    pub fn recv(&self) -> Result<~[u8], MongoErr> {
+    //fn recv(&self, read : bool) -> Result<~[u8], MongoErr> {
+    fn recv(&self, buf : &mut ~[u8], read : bool) -> Result<uint, MongoErr> {
         if self.conn.is_empty() {
             Err(MongoErr::new(
                     ~"client::recv",
@@ -372,7 +546,8 @@ impl Client {
                     ~"attempted to receive on nonexistent connection"))
         } else {
             let tmp = self.conn.take();
-            let result = tmp.recv();
+            //let result = tmp.recv(read);
+            let result = tmp.recv(buf, read);
             self.conn.put_back(tmp);
             result
         }
@@ -390,5 +565,35 @@ impl Client {
         let tmp = self.cur_requestId.take();
         self.cur_requestId.put_back(tmp+1);
         tmp
+    }
+
+    pub fn check_version(@self, ver: ~str) -> Result<(), MongoErr> {
+       let admin = self.get_admin();
+       match admin.run_command(SpecNotation(~"{ 'buildInfo': 1 }")) {
+           Ok(doc) => match doc.find(~"version") {
+               Some(&UString(ref s)) => {
+                   let mut it = s.split_iter('.').zip(ver.split_iter('.'));
+                   for it.advance |(vcur, varg)| {
+                       let ncur = FromStr::from_str::<uint>(vcur);
+                       let narg = FromStr::from_str::<uint>(varg);
+                       if ncur > narg {
+                           return Ok(());
+                       }
+                       else if ncur < narg {
+                           return Err(MongoErr::new(
+                                   ~"shard::check_version",
+                                   fmt!("version %s is too old", *s),
+                                   fmt!("please upgrade to at least version %s of MongoDB", ver)));
+                       }
+                   }
+                   return Ok(());
+               },
+               _ => return Err(MongoErr::new(
+                           ~"shard::check_version",
+                           ~"unknown error while checking version",
+                           ~"the database did not return a version field"))
+           },
+           Err(e) => return Err(e)
+       }
     }
 }

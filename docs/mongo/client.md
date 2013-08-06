@@ -11,8 +11,10 @@
 
 ~~~ {.rust}
 pub struct Client {
-    conn: ~cell::Cell<NodeConnection>,
-    priv cur_requestId: ~cell::Cell<i32>,
+    conn: Cell<@Connection>,
+    timeout: u64,
+    priv rs_conn: Cell<@ReplicaSetConnection>,
+    priv cur_requestId: Cell<i32>,
 }
 ~~~
 
@@ -33,7 +35,9 @@ fn new() -> Client
 Creates a new Mongo client.
 
 Currently can connect to single unreplicated, unsharded
-server via `connect`.
+server via `connect`, or to a replica set via `connect_to_rs`
+(given a seed, if already initiated), or via `initiate_rs`
+(given a configuration and single host, if not yet initiated).
 
 #### Returns
 
@@ -85,7 +89,7 @@ handle to specified database
 ### Method `drop_db`
 
 ~~~ {.rust}
-fn drop_db(@self, db: ~str) -> Result<(), MongoErr>
+fn drop_db(@self, db: &str) -> Result<(), MongoErr>
 ~~~
 
 Drops the given database.
@@ -121,10 +125,17 @@ Alternative to constructing the `Collection` explicitly
 
 handle to specified collection
 
+### Method `_connect_to_conn`
+
+~~~ {.rust}
+fn _connect_to_conn(&self, call: &str, conn: @Connection) ->
+ Result<(), MongoErr>
+~~~
+
 ### Method `connect`
 
 ~~~ {.rust}
-fn connect(&self, server_ip_str: ~str, server_port: uint) ->
+fn connect(&self, server_ip_str: &str, server_port: uint) ->
  Result<(), MongoErr>
 ~~~
 
@@ -144,13 +155,65 @@ Connects to a single server.
 * already connected
 * network
 
+### Method `connect_to_rs`
+
+~~~ {.rust}
+fn connect_to_rs(&self, seed: &[(~str, uint)]) -> Result<(), MongoErr>
+~~~
+
+Connect to replica set with specified seed list.
+
+#### Arguments
+
+`seed` - seed list (vector) of ip/port pairs
+
+#### Returns
+
+() on success, MongoErr on failure
+
+### Method `initiate_rs`
+
+~~~ {.rust}
+fn initiate_rs(@self, via: (&str, uint), conf: RSConfig) ->
+ Result<(), MongoErr>
+~~~
+
+Initiates given configuration specified as `RSConfig`, and connects
+to the replica set.
+
+#### Arguments
+
+* `via` - host to connect to in order to initiate the set
+* `conf` - configuration to initiate
+
+#### Returns
+
+() on success, MongoErr on failure
+
+### Method `set_read_pref`
+
+~~~ {.rust}
+fn set_read_pref(&self, np: READ_PREFERENCE) ->
+ Result<READ_PREFERENCE, MongoErr>
+~~~
+
+Sets read preference as specified, returning former preference.
+
+#### Arguments
+
+* `np` - new read preference
+
+#### Returns
+
+old read preference on success, MongoErr on failure
+
 ### Method `disconnect`
 
 ~~~ {.rust}
 fn disconnect(&self) -> Result<(), MongoErr>
 ~~~
 
-Disconnects from server.
+Disconnect from server.
 Simultaneously empties connection cell.
 
 #### Returns
@@ -161,11 +224,17 @@ Simultaneously empties connection cell.
 
 * network
 
+### Method `reconnect`
+
+~~~ {.rust}
+fn reconnect(&self) -> Result<(), MongoErr>
+~~~
+
 ### Method `_send_msg`
 
 ~~~ {.rust}
-fn _send_msg(@self, msg: ~[u8], wc_pair: (&~str, Option<~[WRITE_CONCERN]>),
-             auto_get_reply: bool) -> Result<Option<ServerMsg>, MongoErr>
+fn _send_msg(@self, msg: ~[u8], wc_pair: (~str, Option<~[WRITE_CONCERN]>),
+             read: bool) -> Result<Option<ServerMsg>, MongoErr>
 ~~~
 
 Sends message on connection; if write, checks write concern,
@@ -175,52 +244,14 @@ and if query, picks up OP_REPLY.
 
 * `msg` - bytes to send
 * `wc` - write concern (if applicable)
-* `auto_get_reply` - whether `Client` should expect an `OP_REPLY`
-                     from the server
+* `read` - whether read operation; whether `Client` should
+                     expect an `OP_REPLY` from the server
 
 #### Returns
 
 if read operation, `OP_REPLY` on success, `MongoErr` on failure;
 if write operation, `None` on no last error, `MongoErr` on last error
      or network error
-
-### Method `send`
-
-~~~ {.rust}
-fn send(&self, bytes: ~[u8]) -> Result<(), MongoErr>
-~~~
-
-Sends on `Connection` affiliated with this `Client`.
-
-#### Arguments
-
-* `bytes` - bytes to send
-
-#### Returns
-
-() on success, `MongoErr` on failure
-
-#### Failure Types
-
-* not connected
-* network
-
-### Method `recv`
-
-~~~ {.rust}
-fn recv(&self) -> Result<~[u8], MongoErr>
-~~~
-
-Receives on `Connection` affiliated with this `Client`.
-
-#### Returns
-
-bytes received over connection on success, `MongoErr` on failure
-
-#### Failure Types
-
-* not connected
-* network
 
 ### Method `get_requestId`
 
@@ -237,4 +268,10 @@ fn inc_requestId(&self) -> i32
 ~~~
 
 Increments first unused requestId and returns former value.
+
+### Method `check_version`
+
+~~~ {.rust}
+fn check_version(@self, ver: ~str) -> Result<(), MongoErr>
+~~~
 

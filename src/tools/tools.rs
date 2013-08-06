@@ -13,26 +13,12 @@
  * limitations under the License.
  */
 
-extern mod bson;
-extern mod mongo;
+#[link(name="tools", vers="0.1.0", author="austin.estep@10gen.com, jaoke.chinlee@10gen.com")];
+#[crate_type="lib"];
+#[license="Apache 2.0"];
+
 extern mod std;
 
-pub mod fill_coll;
-
-mod good_insert_single;
-mod good_insert_batch_small;
-mod good_insert_batch_big;
-mod bad_insert_no_cont;
-mod bad_insert_cont;
-mod indices;
-mod get_collections;
-mod drop_collection;
-mod sort;
-mod limit_and_skip;
-mod update;
-mod capped_coll;
-mod drop_db;
-mod add_user;
-mod authenticate;
-mod logout;
-mod validate;
+pub mod md5;
+pub mod stream;
+pub mod ord_hash;

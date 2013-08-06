@@ -13,15 +13,11 @@
  * limitations under the License.
  */
 
-use std::int::range;
-use std::libc::c_int;
-use std::ptr::to_unsafe_ptr;
-use std::to_bytes::*;
-
 use bson::encode::*;
 use bson::formattable::*;
 
 use util::*;
+use tools::md5::*;
 use client::Client;
 use coll::Collection;
 
@@ -30,49 +26,6 @@ static L_END: bool = true;
 pub struct DB {
     name : ~str,
     priv client : @Client,
-}
-
-#[link_args = "-lmd5"]
-extern {
-    fn md5_init(pms: *MD5State);
-    fn md5_append(pms: *MD5State, data: *const u8, nbytes: c_int);
-    fn md5_finish(pms: *MD5State, digest: *[u8,..16]);
-}
-
-priv struct MD5State {
-    count: [u32,..2],
-    abcd: [u32,..4],
-    buf: [u8,..64]
-}
-
-impl MD5State {
-    fn new(len: u64) -> MD5State {
-        let mut c: [u32,..2] = [0u32,0];
-        let l = len.to_bytes(L_END);
-        c[0] |= l[0] as u32;
-        c[0] |= (l[1] << 8) as u32;
-        c[0] |= (l[2] << 16) as u32;
-        c[0] |= (l[3] << 24) as u32;
-        c[1] |= l[4] as u32;
-        c[1] |= (l[5] << 8) as u32;
-        c[1] |= (l[6] << 16) as u32;
-        c[1] |= (l[7] << 24) as u32;
-
-        MD5State {
-            count: c,
-            abcd: [0u32,0,0,0],
-            buf: [
-                0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0,
-                0,0,0,0,0,0,0,0
-                ]
-        }
-    }
 }
 
 /**
@@ -117,7 +70,7 @@ impl DB {
         let mut names : ~[~str] = ~[];
 
         // query on namespace collection
-        let coll = @Collection::new(copy self.name, fmt!("%s", SYSTEM_NAMESPACE), self.client);
+        let coll = Collection::new(self.name.clone(), SYSTEM_NAMESPACE.to_owned(), self.client);
         let mut cur = match coll.find(None, None, None) {
             Ok(cursor) => cursor,
             Err(e) => return Err(e),
@@ -168,7 +121,7 @@ impl DB {
 
         let mut coll : ~[Collection] = ~[];
         for names.iter().advance |&n| {
-            coll = coll + ~[Collection::new(copy self.name, n, self.client)];
+            coll.push(Collection::new(self.name.clone(), n, self.client));
         }
 
         Ok(coll)
@@ -194,7 +147,7 @@ impl DB {
                         coll,
                         self.process_create_ops(flags, option_array));
         match self.run_command(SpecNotation(cmd)) {
-            Ok(_) => Ok(Collection::new(copy self.name, coll, self.client)),
+            Ok(_) => Ok(Collection::new(self.name.clone(), coll, self.client)),
             Err(e) => Err(e),
         }
     }
@@ -229,7 +182,7 @@ impl DB {
      * handle to collection
      */
     pub fn get_collection(&self, coll : ~str) -> Collection {
-        Collection::new(copy self.name, coll, self.client)
+        Collection::new(self.name.clone(), coll, self.client)
     }
     /**
      * Drops given collection from database associated with this `DB`.
@@ -240,7 +193,7 @@ impl DB {
      * # Returns
      * () on success, `MongoErr` on failure
      */
-    pub fn drop_collection(&self, coll : ~str) -> Result<(), MongoErr> {
+    pub fn drop_collection(&self, coll : &str) -> Result<(), MongoErr> {
         match self.run_command(SpecNotation(fmt!("{ \"drop\":\"%s\" }", coll))) {
             Ok(_) => Ok(()),
             Err(e) => Err(e),
@@ -261,14 +214,14 @@ impl DB {
      * appropriately by caller, `MongoErr` on failure
      */
     pub fn run_command(&self, cmd : QuerySpec) -> Result<~BsonDocument, MongoErr> {
-        let coll = Collection::new(copy self.name, fmt!("%s", SYSTEM_COMMAND), self.client);
+        let coll = Collection::new(self.name.clone(), SYSTEM_COMMAND.to_owned(), self.client);
 
         //let ret_msg = match coll.find_one(Some(cmd), None, None, None) {
         let ret_msg = match coll.find_one(Some(copy cmd), None, Some(~[NO_CUR_TIMEOUT])) {
             Ok(msg) => msg,
             Err(e) => return Err(MongoErr::new(
                                     ~"db::run_command",
-                                    fmt!("error getting return value from run_command %?", cmd),
+                                    fmt!("error getting return value from run_command %?", cmd.to_str()),
                                     fmt!("-->\n%s", e.to_str()))),
         };
 
@@ -278,12 +231,12 @@ impl DB {
                 Double(v) => v,
                 _ => return Err(MongoErr::new(
                                     ~"db::run_command",
-                                    fmt!("error in returned value from run_command %?", cmd),
+                                    fmt!("error in returned value from run_command %?", cmd.to_str()),
                                     fmt!("\"ok\" field contains %?", *x))),
             },
             None => return Err(MongoErr::new(
                                     ~"db::run_command",
-                                    fmt!("error in returned value from run_command %?", cmd),
+                                    fmt!("error in returned value from run_command %?", cmd.to_str()),
                                     ~"no \"ok\" field in return message!")),
         };
         match ok {
@@ -297,19 +250,19 @@ impl DB {
                 UString(ref s) => s,
                 _ => return Err(MongoErr::new(
                                     ~"db::run_command",
-                                    fmt!("error in returned value from run_command %?", cmd),
+                                    fmt!("error in returned value from run_command %?", cmd.to_str()),
                                     fmt!("\"errmsg\" field contains %?", *x))),
             },
             None => return Err(MongoErr::new(
                                     ~"db::run_command",
-                                    fmt!("error in returned value from run_comand %?", cmd),
+                                    fmt!("error in returned value from run_comand %?", cmd.to_str()),
                                     ~"run_command failed without msg!")),
         };
 
         Err(MongoErr::new(
                 ~"db::run_command",
-                fmt!("run_command %? failed", cmd),
-                copy *errmsg))
+                fmt!("run_command %? failed", cmd.to_str()),
+                errmsg.clone()))
     }
 
     /**
@@ -332,24 +285,27 @@ impl DB {
             None => ~[W_N(1), FSYNC(false)],
             Some(w) => w,
         };
+
+        let mut concern_doc = BsonDocument::new();
+        concern_doc.put(~"getLastError", Bool(true));
+
         // parse write concern, early exiting if set to <= 0
-        let mut concern_str = ~"{ \"getLastError\":1";
         for concern.iter().advance |&opt| {
-            concern_str.push_str(match opt {
-                JOURNAL(j) => fmt!(", \"j\":%?", j),
+            match opt {
+                JOURNAL(j) => concern_doc.put(~"j", Bool(j)),
                 W_N(w) => {
                     if w <= 0 { return Ok(()); }
-                    else { fmt!(", \"w\":%d", w) }
+                    else { concern_doc.put(~"w", Int32(w as i32)) }
                 }
-                W_STR(w) => fmt!(", \"w\":\"%s\"", w),
-                WTIMEOUT(t) => fmt!(", \"wtimeout\":%d", t),
-                FSYNC(s) => fmt!(", \"fsync\":%?", s),
-            });
+                W_STR(w) => concern_doc.put(~"w", UString(w)),
+                W_TAGSET(ts) => concern_doc.union(ts.to_bson_t()),
+                WTIMEOUT(t) => concern_doc.put(~"wtimeout", Int32(t as i32)),
+                FSYNC(s) => concern_doc.put(~"fsync", Bool(s)),
+            }
         }
-        concern_str.push_str(~" }");
 
         // run_command and get entire doc
-        let err_doc_tmp = match self.run_command(SpecNotation(concern_str)) {
+        let err_doc_tmp = match self.run_command(SpecObj(concern_doc)) {
             Ok(doc) => doc,
             Err(e) => return Err(MongoErr::new(
                                     ~"db::get_last_error",
@@ -387,7 +343,7 @@ impl DB {
             UString(s) => Err(MongoErr::new(
                             ~"db::get_last_error",
                             ~"getLastError error",
-                            copy s)),
+                            s)),
             _ => Err(MongoErr::new(
                             ~"db::get_last_error",
                             ~"getLastError unexpected format",
@@ -395,16 +351,32 @@ impl DB {
         }
     }
 
+    ///Enable sharding on this database.
+    pub fn enable_sharding(&self) -> Result<(), MongoErr> {
+        match self.run_command(SpecNotation(fmt!("{ \"enableSharding\": %s }", self.name))) {
+            Ok(doc) => match *doc.find(~"ok").unwrap() {
+                Double(1f64) => return Ok(()),
+                Int32(1i32) => return Ok(()),
+                Int64(1i64) => return Ok(()),
+                _ => return Err(MongoErr::new(
+                    ~"db::logout",
+                    ~"error while logging out",
+                    ~"the server returned ok: 0"))
+            },
+            Err(e) => return Err(e)
+        };
+    }
+
     ///Add a new database user with the given username and password.
     ///If the system.users collection becomes unavailable, this will fail.
     pub fn add_user(&self, username: ~str, password: ~str, roles: ~[~str]) -> Result<(), MongoErr>{
-        let coll = self.get_collection(~"system.users");
+        let coll = self.get_collection(SYSTEM_USERS.to_owned());
         let mut user = match coll.find_one(Some(SpecNotation(fmt!("{ \"user\": \"%s\" }", username))), None, None)
             {
                 Ok(u) => u,
                 Err(_) => {
                     let mut doc = BsonDocument::new();
-                    doc.put(~"user", UString(copy username));
+                    doc.put(~"user", UString(username.clone()));
                     ~doc
                 }
             };
@@ -417,7 +389,7 @@ impl DB {
     pub fn authenticate(&self, username: ~str, password: ~str) -> Result<(), MongoErr> {
         let nonce = match self.run_command(SpecNotation(~"{ \"getnonce\": 1 }")) {
             Ok(doc) => match *doc.find(~"nonce").unwrap() { //this unwrap should always succeed
-                UString(ref s) => copy *s,
+                UString(ref s) => (*s).clone(),
                 _ => return Err(MongoErr::new(
                     ~"db::authenticate",
                     ~"error while getting nonce",
@@ -456,55 +428,35 @@ impl DB {
     }
 
     ///Get the profiling level of the database.
-    pub fn get_profiling_level(&self) -> Result<int, MongoErr> {
+    // XXX return type; potential for change
+    pub fn get_profiling_level(&self) -> Result<(int, Option<int>), MongoErr> {
         match self.run_command(SpecNotation(~"{ \"profile\": -1 }")) {
-            Ok(d) => match d.find(~"was") {
-                Some(&Double(f)) => Ok(f as int),
-                _ => return Err(MongoErr::new(
-                    ~"db::get_profiling_level",
-                    ~"could not get profiling level",
-                    ~"an invalid profiling level was returned"))
-            },
+            Ok(d) => {
+                let level = match d.find(~"was") {
+                    Some(&Double(f)) => f as int,
+                    _ => return Err(MongoErr::new(
+                        ~"db::get_profiling_level",
+                        ~"could not get profiling level",
+                        ~"an invalid profiling level was returned"))
+                };
+                let thresh = match d.find(~"slowms") {
+                    None => None,
+                    Some(&Double(ms)) => Some(ms as int),
+                    _ => return Err(MongoErr::new(
+                        ~"db::get_profiling_level",
+                        ~"could not get profiling threshold",
+                        ~"an invalid profiling threshold was returned"))
+                };
+
+                Ok((level, thresh))
+            }
             Err(e) => return Err(e)
         }
     }
 
     ///Set the profiling level of the database.
+    // XXX argument types; potential for change
     pub fn set_profiling_level(&self, level: int) -> Result<~BsonDocument, MongoErr> {
         self.run_command(SpecNotation(fmt!("{ \"profile\": %d }", level)))
     }
-}
-
-priv fn md5(msg: &str) -> ~str {
-    let msg_bytes = msg.to_bytes(L_END);
-    let m = MD5State::new(msg_bytes.len() as u64);
-    let digest: [u8,..16] = [
-        0,0,0,0,
-        0,0,0,0,
-        0,0,0,0,
-        0,0,0,0
-    ];
-
-    unsafe {
-        md5_init(to_unsafe_ptr(&m));
-        md5_append(to_unsafe_ptr(&m), to_unsafe_ptr(&(msg_bytes[0])), msg_bytes.len() as i32);
-        md5_finish(to_unsafe_ptr(&m), to_unsafe_ptr(&digest));
-    }
-
-    let mut result: ~str = ~"";
-    for range(0, 16) |i| {
-        let mut byte = fmt!("%x", digest[i] as uint);
-        if byte.len() == 1 {
-            byte = (~"0").append(byte);
-        }
-        result.push_str(byte);
-    }
-    result
-}
-
-#[cfg(test)]
-#[test]
-fn md5_test() {
-    assert_eq!(md5(~"hello"), ~"5d41402abc4b2a76b9719d911017c592");
-    assert_eq!(md5(~"asdfasdfasdf"), ~"a95c530a7af5f492a74499e70578d150");
 }

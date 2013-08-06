@@ -13,16 +13,9 @@
  * limitations under the License.
  */
 
-#[link(name="bson", vers="0.1", author="austin.estep@10gen.com, jaoke.chinlee@10gen.com")];
-#[crate_type="lib"];
-#[license="Apache 2.0"];
-
+extern mod gridfs;
+extern mod bson;
+extern mod mongo;
 extern mod std;
-extern mod extra;
 
-mod ord_hash;
-mod stream;
-pub mod json_parse;
-pub mod encode;
-pub mod decode;
-pub mod formattable;
+mod grid_files;

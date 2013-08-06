@@ -12,59 +12,90 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Rust compilation
 RC = rustc
 RDOC = rustdoc
 RDOCFLAGS = --output-style doc-per-mod --output-format markdown
+FLAGS = -Z debug-info -L ./bin -D unused-unsafe -A unnecessary-allocation $(TOOLFLAGS)
+
+# C compilation
 CC = gcc
 AR = ar rcs
-FLAGS = -Z debug-info -L ./bin -D unused-unsafe -A unnecessary-allocation $(TOOLFLAGS)
 CFLAGS = -c -g -Wall -Werror
+
+# Programs and utilities
 RM = rm
 RMDIR = rmdir -p
 MKDIR = mkdir -p
 
+# Directories
 SRC = ./src
 LIB = ./lib
 BSONDIR = ./src/libbson
 MONGODIR = ./src/libmongo
+GRIDDIR = ./src/libgridfs
+UTILDIR = ./src/tools
 EXDIR = ./examples
 BIN = ./bin
 TEST = ./test
 DOCS = ./docs
 
+# Variables
 MONGOTEST = 0
+TOOLFLAGS =
 
 .PHONY: test
 
-all: bin libs bson mongo
+all: bin libs util bson mongo gridfs
 
 bin:
 	$(MKDIR) bin
 	$(MKDIR) test
+
+util: $(UTILDIR)/*
+	$(RC) $(FLAGS) --lib --out-dir $(BIN) $(UTILDIR)/tools.rs
 
 libs: $(LIB)/md5.c
 	$(CC) $(CFLAGS) -o $(BIN)/md5.o $(LIB)/md5.c
 	$(AR) $(BIN)/libmd5.a $(BIN)/md5.o
 
 bson: $(BSONDIR)/*
-	$(RC) $(FLAGS) --lib --out-dir $(BIN) $(BSONDIR)/bson.rc
+	$(RC) $(FLAGS) --lib --out-dir $(BIN) $(BSONDIR)/bson.rs
 
 mongo: $(MONGODIR)/*
-	$(RC) $(FLAGS) --lib --out-dir $(BIN) $(MONGODIR)/mongo.rc
+	$(RC) $(FLAGS) --lib --out-dir $(BIN) $(MONGODIR)/mongo.rs
 
-test: $(BSONDIR)/bson.rc $(MONGODIR)/mongo.rc
-	$(RC) $(FLAGS) --test -o $(TEST)/bson_test $(BSONDIR)/bson.rc
-	$(RC) $(FLAGS) --test -o $(TEST)/mongo_test $(MONGODIR)/mongo.rc
-	$(RC) $(FLAGS) --test -o $(TEST)/driver_test $(MONGODIR)/test/test.rc
+gridfs: $(GRIDDIR)/*
+	$(RC) $(FLAGS) --lib --out-dir $(BIN) $(GRIDDIR)/gridfs.rs
+
+test: $(BSONDIR)/bson.rs $(MONGODIR)/mongo.rs $(MONGODIR)/test/test.rs
+	$(RC) $(FLAGS) --test -o $(TEST)/tool_test $(UTILDIR)/tools.rs
+	$(RC) $(FLAGS) --test -o $(TEST)/bson_test $(BSONDIR)/bson.rs
+	$(RC) $(FLAGS) --test -o $(TEST)/mongo_test $(MONGODIR)/mongo.rs
+	$(RC) $(FLAGS) --test -o $(TEST)/driver_test $(MONGODIR)/test/test.rs
+	$(RC) $(FLAGS) --test -o $(TEST)/grid_test $(GRIDDIR)/test/test.rs
 
 check: test
 ifeq ($(MONGOTEST),1)
+	$(TEST)/tool_test
 	$(TEST)/bson_test
 	$(TEST)/mongo_test
 	$(TEST)/driver_test
+	$(TEST)/grid_test
 else
+	$(TEST)/tool_test
 	$(TEST)/bson_test
 	$(TEST)/mongo_test
+endif
+
+bench: test
+ifeq ($(MONGOTEST),1)
+	$(TEST)/bson_test --bench
+	$(TEST)/mongo_test --bench
+	$(TEST)/driver_test --bench
+else
+	$(TEST)/bson_test --bench
+	$(TEST)/mongo_test --bench
 endif
 
 ex: $(EXDIR)/*
@@ -76,8 +107,10 @@ doc: $(BSONDIR)/*.rs $(MONGODIR)/*
 	$(MKDIR) docs
 	$(MKDIR) docs/bson
 	$(MKDIR) docs/mongo
-	$(RDOC) $(RDOCFLAGS) --output-dir $(DOCS)/bson $(BSONDIR)/bson.rc
-	$(RDOC) $(RDOCFLAGS) --output-dir $(DOCS)/mongo $(MONGODIR)/mongo.rc
+	$(MKDIR) docs/gridfs
+	$(RDOC) $(RDOCFLAGS) --output-dir $(DOCS)/bson $(BSONDIR)/bson.rs
+	$(RDOC) $(RDOCFLAGS) --output-dir $(DOCS)/mongo $(MONGODIR)/mongo.rs
+	$(RDOC) $(RDOCFLAGS) --output-dir $(DOCS)/gridfs $(GRIDDIR)/gridfs.rs
 
 clean:
 	$(RM) -rf $(TEST)

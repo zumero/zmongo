@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#[link(name="mongo", vers="0.1", author="jaoke.chinlee@10gen.com, austin.estep@10gen.com")];
+#[link(name="mongo", vers="0.1.0", author="jaoke.chinlee@10gen.com, austin.estep@10gen.com")];
 #[comment="a huMONGOus crate"];
 #[license="Apache 2.0"];
 #[crate_type="lib"];
@@ -25,25 +25,28 @@
 extern mod std;
 extern mod extra;
 extern mod bson;
+extern mod tools;
 
 // Misc: utility module
 #[macro_escape]
 pub mod util;
 #[macro_escape]
 mod mockable;
+pub mod index;      // index for querying
 
 // Client-side components
 pub mod client;     // primary point-of-entry for driver system
 pub mod db;         // database-related functionality
 pub mod coll;       // collection-related functionality
+pub mod rs;         // replicaset-related functionality
 
 // Connection components
 mod conn;       // medium for connecting to [a] server(s); general, should be hidden from user
-//pub mod conn_node;    // ...; node
-mod msg;        // message header and related; should be hidden from user
-//pub mod conn_replica; // ...; replica set
+pub mod conn_node;    // ...; node
+pub mod conn_replica; // ...; replica set
 //pub mod conn_shard;   // ...; sharded cluster
+mod msg;        // message header and related; should be hidden from user
+pub mod shard;   // ...; sharded cluster
 
 // Cursor components
 pub mod cursor;     // mode of interaction with results
-//pub mod index;      // index for querying?

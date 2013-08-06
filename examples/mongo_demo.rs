@@ -25,6 +25,7 @@ use mongo::client::*;
 use mongo::util::*;
 use mongo::coll::*;
 use mongo::db::*;
+use mongo::index::*;
 
 use bson::encode::*;
 use bson::formattable::*;
@@ -62,7 +63,7 @@ fn main() {
         Ok(bson) => Embedded(bson),
         Err(e) => fail!(e.to_str()),
     };
-    let fst = match BsonFormattable::from_bson_t::<Person>(doc) {
+    let fst = match BsonFormattable::from_bson_t::<Person>(&doc) {
         Ok(p) => p,
         Err(e) => fail!(e.to_str()),
     };
@@ -81,7 +82,7 @@ fn main() {
         Ok(i) => i,
         Err(e) => fail!(e.to_str()),
     };
-    for inds.iter().advance |&i| { println(fmt!("%s\n", i)); }
+    for inds.iter().advance |&i| { println(fmt!("%?\n", i)); }
     println("");
 //
     println("creating, sorting on, and explaining cursor");
@@ -95,7 +96,7 @@ fn main() {
 //
     println("printing query results from cursor");
     for cursor.advance |p| {
-        println(fmt!("%?\n", BsonFormattable::from_bson_t::<Person>(Embedded(p))));
+        println(fmt!("%?\n", BsonFormattable::from_bson_t::<Person>(&Embedded(p))));
     }
     println("");
 //
@@ -144,7 +145,7 @@ fn main() {
         let mut p = cursor.next();
         while p.is_none() && !cursor.is_dead() { p = cursor.next(); }
         if cursor.is_dead() { break; }
-        println(fmt!("read %?", BsonFormattable::from_bson_t::<Person>(Embedded(p.unwrap()))));
+        println(fmt!("read %?", BsonFormattable::from_bson_t::<Person>(&Embedded(p.unwrap()))));
     }
     println("");
 //

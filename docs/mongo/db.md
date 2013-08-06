@@ -116,7 +116,7 @@ handle to collection
 ### Method `drop_collection`
 
 ~~~ {.rust}
-fn drop_collection(&self, coll: ~str) -> Result<(), MongoErr>
+fn drop_collection(&self, coll: &str) -> Result<(), MongoErr>
 ~~~
 
 Drops given collection from database associated with this `DB`.
@@ -169,6 +169,14 @@ Parses write concern into bytes and sends to server.
 * network
 * getLastError error, e.g. duplicate ```_id```s
 
+### Method `enable_sharding`
+
+~~~ {.rust}
+fn enable_sharding(&self) -> Result<(), MongoErr>
+~~~
+
+Enable sharding on this database.
+
 ### Method `add_user`
 
 ~~~ {.rust}
@@ -199,7 +207,7 @@ Closing a connection will also log out.
 ### Method `get_profiling_level`
 
 ~~~ {.rust}
-fn get_profiling_level(&self) -> Result<int, MongoErr>
+fn get_profiling_level(&self) -> Result<(int, Option<int>), MongoErr>
 ~~~
 
 Get the profiling level of the database.

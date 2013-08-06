@@ -26,7 +26,7 @@ pub struct Cursor {
     priv skip: i32,
     priv limit: i32,
     priv data: ~[~BsonDocument],
-    priv i: i32,
+    priv done: Cell<bool>,
 }
 ~~~
 
@@ -142,7 +142,7 @@ specific fields, etc.
 ### Method `hint`
 
 ~~~ {.rust}
-fn hint(&mut self, index: MongoIndex)
+fn hint(&mut self, index: MongoIndexSpec)
 ~~~
 
 Hints an index (name or fields+order) to use while querying.
@@ -150,13 +150,15 @@ Hints an index (name or fields+order) to use while querying.
 #### Arguments
 
 * `index` -  `MongoIndexName(name)` of index to use (if named),
-             `MongoIndexFields(~[INDEX_FIELD])` to fully specify
-                 index from scratch
+             `MongoIndexFields(~[INDEX_TYPE])` to specify index
+                 from fields
+             `MongoIndex(full index)` to specify index fully,
+                 e.g. as returned from database
 
 ### Method `sort`
 
 ~~~ {.rust}
-fn sort(&mut self, orderby: INDEX_FIELD) -> Result<(), MongoErr>
+fn sort(&mut self, orderby: INDEX_TYPE) -> Result<(), MongoErr>
 ~~~
 
 Sorts results from `Cursor` given fields and their direction.
@@ -216,7 +218,7 @@ Modifies size of next batch to fetch on `Cursor` refresh.
 ### Method `has_next`
 
 ~~~ {.rust}
-fn has_next(&self) -> bool
+fn has_next(&mut self) -> bool
 ~~~
 
 OTHER USEFUL FUNCTIONS

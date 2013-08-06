@@ -25,6 +25,7 @@ use util::*;
 // XXX ideally, this could be used in all the len computations
 //static header_sz : uint = 4*sys::size_of::<i32>();
 
+#[deriving(Clone,Eq)]
 enum OpCode {
     OP_REPLY = 1i32 as int,
     OP_MSG = 1000i32 as int,        // deprecated; no need to implement
@@ -37,6 +38,7 @@ enum OpCode {
     OP_KILL_CURSORS = 2007i32 as int,
 }
 
+#[deriving(Clone,Eq)]
 struct MsgHeader {
     len : i32,      // total message size in bytes
     id : i32,       // client- or db-generated identifier for message
@@ -44,6 +46,7 @@ struct MsgHeader {
     opcode : i32,
 }
 
+#[deriving(Clone,Eq)]
 pub enum ClientMsg {
     // Client request messages
     OpUpdate {                              // gets no response
@@ -90,6 +93,7 @@ pub enum ClientMsg {
         cursor_ids : ~[i64]
     },
 }
+#[deriving(Clone,Eq)]
 pub enum ServerMsg {
     // DB response messages
     OpReply {
@@ -105,62 +109,100 @@ pub enum ServerMsg {
 /**
  * Converts a message to bytes.
  */
-fn _header_to_bytes(header : MsgHeader) -> ~[u8] {
-    header.len.to_bytes(LITTLE_ENDIAN_TRUE)
-        + header.id.to_bytes(LITTLE_ENDIAN_TRUE)
-        + header.resp_to.to_bytes(LITTLE_ENDIAN_TRUE)
-        + header.opcode.to_bytes(LITTLE_ENDIAN_TRUE)
+fn _header_to_bytes(header : &MsgHeader) -> ~[u8] {
+    let mut bytes = ~[];
+    bytes.push_all_move(header.len.to_bytes(LITTLE_ENDIAN_TRUE));
+    bytes.push_all_move(header.id.to_bytes(LITTLE_ENDIAN_TRUE));
+    bytes.push_all_move(header.resp_to.to_bytes(LITTLE_ENDIAN_TRUE));
+    bytes.push_all_move(header.opcode.to_bytes(LITTLE_ENDIAN_TRUE));
+    bytes
 }
-pub fn msg_to_bytes(msg : ClientMsg) -> ~[u8] {
-    let mut bytes : ~[u8] = ~[];
+pub fn msg_to_bytes(msg : &ClientMsg) -> ~[u8] {
+    let mut bytes = ~[];
     match msg {
-        OpUpdate { header:h, RESERVED_BITS:r, full_collection_name:n, flags:f, selector:s, update_ops:u } => {
-            bytes = bytes + _header_to_bytes(h)
-                        + r.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + n.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + ~[0u8]    // null-terminate name
-                        + f.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + s.to_bson()
-                        + u.to_bson();
+        &OpUpdate {
+                header:ref h,
+                RESERVED_BITS:ref r,
+                full_collection_name:ref n,
+                flags:ref f,
+                selector:ref s,
+                update_ops:ref u } => {
+            bytes.push_all_move(_header_to_bytes(h));
+            bytes.push_all_move(r.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(n.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push(0u8);    // null-terminate name
+            bytes.push_all_move(f.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(s.to_bson());
+            bytes.push_all_move(u.to_bson());
         }
-        OpInsert { header:h, flags:f, full_collection_name:n, docs:d } => {
-            bytes = bytes + _header_to_bytes(h)
-                        + f.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + n.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + ~[0u8];   // null-terminate name
-            for d.iter().advance |doc| { bytes = bytes + doc.to_bson(); }
+        &OpInsert {
+                header:ref h,
+                flags:ref f,
+                full_collection_name:ref n,
+                docs:ref d } => {
+            bytes.push_all_move(_header_to_bytes(h));
+            bytes.push_all_move(f.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(n.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push(0u8);    // null-terminate name
+            for d.iter().advance |doc| { bytes.push_all_move(doc.to_bson()); }
         }
-        OpQuery { header:h, flags:f, full_collection_name:n, nskip:ns, nret:nr, query:q, ret_field_selector:fi } => {
-            bytes = bytes + _header_to_bytes(h)
-                        + f.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + n.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + ~[0u8]    // null-terminate name
-                        + ns.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + nr.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + q.to_bson()
-                        + match fi { None => ~[], Some(f) => f.to_bson() };
+        &OpQuery {
+                header:ref h,
+                flags:ref f,
+                full_collection_name:ref n,
+                nskip:ref ns,
+                nret:ref nr,
+                query:ref q,
+                ret_field_selector:ref fi } => {
+            bytes.push_all_move(_header_to_bytes(h));
+            bytes.push_all_move(f.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(n.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push(0u8);    // null-terminate name
+            bytes.push_all_move(ns.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(nr.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(q.to_bson());
+            bytes.push_all_move(match fi {
+                &None => ~[],
+                &Some(ref f) => f.to_bson(),
+            });
         }
-        OpGetMore { header:h, RESERVED_BITS:r, full_collection_name:n, nret:nr, cursor_id:id } => {
-            bytes = bytes + _header_to_bytes(h)
-                        + r.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + n.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + ~[0u8]    // null-terminate name
-                        + nr.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + id.to_bytes(LITTLE_ENDIAN_TRUE);
+        &OpGetMore {
+                header:ref h,
+                RESERVED_BITS:ref r,
+                full_collection_name:ref n,
+                nret:ref nr,
+                cursor_id:ref id } => {
+            bytes.push_all_move(_header_to_bytes(h));
+            bytes.push_all_move(r.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(n.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push(0u8);    // null-terminate name
+            bytes.push_all_move(nr.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(id.to_bytes(LITTLE_ENDIAN_TRUE));
         }
-        OpDelete { header:h, RESERVED_BITS:r, full_collection_name:n, flags:f, selector:s } => {
-            bytes = bytes + _header_to_bytes(h)
-                        + r.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + n.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + ~[0u8]    // null-terminate name
-                        + f.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + s.to_bson();
+        &OpDelete {
+                header:ref h,
+                RESERVED_BITS:ref r,
+                full_collection_name:ref n,
+                flags:ref f,
+                selector:ref s } => {
+            bytes.push_all_move(_header_to_bytes(h));
+            bytes.push_all_move(r.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(n.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push(0u8);    // null-terminate name
+            bytes.push_all_move(f.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(s.to_bson());
         }
-        OpKillCursors { header:h, RESERVED_BITS:r, ncursor_ids:n, cursor_ids:ids } => {
-            bytes = bytes + _header_to_bytes(h)
-                        + r.to_bytes(LITTLE_ENDIAN_TRUE)
-                        + n.to_bytes(LITTLE_ENDIAN_TRUE);
-            for ids.iter().advance |&cur| { bytes = bytes + cur.to_bytes(LITTLE_ENDIAN_TRUE); }
+        &OpKillCursors {
+                header:ref h,
+                RESERVED_BITS:ref r,
+                ncursor_ids:ref n,
+                cursor_ids:ref ids } => {
+            bytes.push_all_move(_header_to_bytes(h));
+            bytes.push_all_move(r.to_bytes(LITTLE_ENDIAN_TRUE));
+            bytes.push_all_move(n.to_bytes(LITTLE_ENDIAN_TRUE));
+            for ids.iter().advance |&cur| {
+                bytes.push_all_move(cur.to_bytes(LITTLE_ENDIAN_TRUE));
+            }
         }
     }
     bytes
@@ -169,8 +211,12 @@ pub fn msg_to_bytes(msg : ClientMsg) -> ~[u8] {
 /**
  * Boilerplate for update op.
  */
-pub fn mk_update(id : i32, db : &~str, name : &~str, flags : i32, selector : BsonDocument, update_ops : BsonDocument) -> ClientMsg {
-    let full = fmt!("%s.%s", *db, *name);
+pub fn mk_update(   id : i32,
+                    db : &str, name : &str,
+                    flags : i32,
+                    selector : BsonDocument,
+                    update_ops : BsonDocument) -> ClientMsg {
+    let full = fmt!("%s.%s", db, name);
     let len = (   4*sys::size_of::<i32>()
                 + 2*sys::size_of::<i32>()
                 + full.len() + 1
@@ -190,8 +236,11 @@ pub fn mk_update(id : i32, db : &~str, name : &~str, flags : i32, selector : Bso
 /**
  * Boilerplate for insert op.
  */
-pub fn mk_insert(id : i32, db : &~str, name : &~str, flags : i32, docs : ~[BsonDocument]) -> ClientMsg {
-    let full = fmt!("%s.%s", *db, *name);
+pub fn mk_insert(   id : i32,
+                    db : &str, name : &str,
+                    flags : i32,
+                    docs : ~[BsonDocument]) -> ClientMsg {
+    let full = fmt!("%s.%s", db, name);
     let mut len = (   4*sys::size_of::<i32>()
                 + sys::size_of::<i32>()
                 + full.len() + 1) as i32;
@@ -208,8 +257,14 @@ pub fn mk_insert(id : i32, db : &~str, name : &~str, flags : i32, docs : ~[BsonD
 /**
  * Boilerplate for query op.
  */
-pub fn mk_query(id : i32, db : &~str, name : &~str, flags : i32, nskip : i32, nret : i32, query : BsonDocument, ret_field_selector : Option<BsonDocument>) -> ClientMsg {
-    let full = fmt!("%s.%s", *db, *name);
+pub fn mk_query(    id : i32,
+                    db : &str, name : &str,
+                    flags : i32,
+                    nskip : i32,
+                    nret : i32,
+                    query : BsonDocument,
+                    ret_field_selector : Option<BsonDocument>) -> ClientMsg {
+    let full = fmt!("%s.%s", db, name);
     let mut len = (   4*sys::size_of::<i32>()
                 + 3*sys::size_of::<i32>()
                 + full.len() + 1
@@ -233,8 +288,11 @@ pub fn mk_query(id : i32, db : &~str, name : &~str, flags : i32, nskip : i32, nr
 /**
  * Boilerplate for get_more op.
  */
-pub fn mk_get_more(id : i32, db : &~str, name : &~str, nret : i32, cursor_id : i64) -> ClientMsg {
-    let full = fmt!("%s.%s", *db, *name);
+pub fn mk_get_more( id : i32,
+                    db : &str, name : &str,
+                    nret : i32,
+                    cursor_id : i64) -> ClientMsg {
+    let full = fmt!("%s.%s", db, name);
     let len = (   4*sys::size_of::<i32>()
                 + 2*sys::size_of::<i32>()
                 + 1*sys::size_of::<i64>()
@@ -252,8 +310,11 @@ pub fn mk_get_more(id : i32, db : &~str, name : &~str, nret : i32, cursor_id : i
 /**
  * Boilerplate for delete op.
  */
-pub fn mk_delete(id : i32, db : &~str, name : &~str, flags : i32, selector : BsonDocument) -> ClientMsg {
-    let full = fmt!("%s.%s", *db, *name);
+pub fn mk_delete(   id : i32,
+                    db : &str, name : &str,
+                    flags : i32,
+                    selector : BsonDocument) -> ClientMsg {
+    let full = fmt!("%s.%s", db, name);
     let len = (   4*sys::size_of::<i32>()
                 + 2*sys::size_of::<i32>()
                 + full.len() + 1
@@ -271,7 +332,9 @@ pub fn mk_delete(id : i32, db : &~str, name : &~str, flags : i32, selector : Bso
 /**
  * Boilerplate for cursor kill op.
  */
-pub fn mk_kill_cursor(id : i32, ncursor_ids : i32, cursor_ids : ~[i64]) -> ClientMsg {
+pub fn mk_kill_cursor(  id : i32,
+                        ncursor_ids : i32,
+                        cursor_ids : ~[i64]) -> ClientMsg {
     let len = (   4*sys::size_of::<i32>()
                 + 2*sys::size_of::<i32>()
                 + cursor_ids.len()*sys::size_of::<i64>()) as i32;
@@ -285,16 +348,49 @@ pub fn mk_kill_cursor(id : i32, ncursor_ids : i32, cursor_ids : ~[i64]) -> Clien
 }
 
 /**
- * Parses bytes into msg, for reply op.
- * Assumes machine little-endian; messages are.
+ * Parses bytes into header, for reply op.
  */
-pub fn parse_reply(bytes : ~[u8]) -> Result<ServerMsg, MongoErr> {
-    // prepare to pull out non-document fields with pointer arithmetic
+pub fn parse_header(bytes : &[u8]) -> Result<MsgHeader, MongoErr> {
+    let header_sz = 4*sys::size_of::<i32>();
+    if bytes.len() != header_sz {
+        return Err(MongoErr::new(
+                    ~"msg::parse_header",
+                    ~"buffer wrong number of bytes",
+                    fmt!("expected %?, found %?", header_sz, bytes.len())));
+    }
+
+    // prepare to pull out header fields with pointer arithmetic
     let len_addr = to_ptr::<u8>(bytes) as uint;
     let id_addr = len_addr + sys::size_of::<i32>();
     let resp_to_addr = id_addr + sys::size_of::<i32>();
     let opcode_addr = resp_to_addr + sys::size_of::<i32>();
-    let flags_addr = opcode_addr + sys::size_of::<i32>();
+
+    unsafe {
+        Ok(MsgHeader {  len : *(len_addr as *i32),
+                        id : *(id_addr as *i32),
+                        resp_to : *(resp_to_addr as *i32),
+                        opcode : *(opcode_addr as *i32) })
+    }
+}
+
+/**
+ * Parses bytes into msg, for reply op.
+ * Assumes machine little-endian; messages are.
+ */
+pub fn parse_reply(header : MsgHeader, bytes : &[u8])
+            -> Result<ServerMsg, MongoErr> {
+    let header_sz = 4*sys::size_of::<i32>();
+    if bytes.len() != header.len as uint - header_sz {
+        return Err(MongoErr::new(
+                    ~"msg::parse_reply",
+                    ~"buffer wrong number of bytes",
+                    fmt!("expected %?, found %?",
+                            header.len as uint - header_sz,
+                            bytes.len())));
+    }
+
+    // prepare to pull out non-document fields with pointer arithmetic
+    let flags_addr = to_ptr::<u8>(bytes) as uint;
     let cursor_id_addr = flags_addr + sys::size_of::<i32>();
     let start_addr = cursor_id_addr + sys::size_of::<i64>();
     let nret_addr = start_addr + sys::size_of::<i32>();
@@ -302,10 +398,10 @@ pub fn parse_reply(bytes : ~[u8]) -> Result<ServerMsg, MongoErr> {
     unsafe {
         // pull out documents one-by-one
         let mut docs : ~[~BsonDocument] = ~[];
-        let mut head = nret_addr + sys::size_of::<i32>() - len_addr;
+        let mut head = nret_addr + sys::size_of::<i32>() - flags_addr;
 
         for (*(nret_addr as *i32) as uint).times {
-            let size = *((head+len_addr) as *i32);
+            let size = *((head+flags_addr) as *i32);
 
             let doc_bytes = bytes.slice(head, head+(size as uint)).to_owned();
             let tmp = match decode(doc_bytes) {
@@ -315,16 +411,13 @@ pub fn parse_reply(bytes : ~[u8]) -> Result<ServerMsg, MongoErr> {
                                         ~"error unpacking documents",
                                         fmt!("-->\n%s", e))),
             };
-            docs = docs + ~[~tmp];
+            docs.push(~tmp);
             head = head + size as uint;
         }
 
         // construct reply
         Ok(OpReply {
-            header : MsgHeader {    len : *(len_addr as *i32),
-                                    id : *(id_addr as *i32),
-                                    resp_to : *(resp_to_addr as *i32),
-                                    opcode : *(opcode_addr as *i32) },
+            header : header,
             flags : *(flags_addr as *i32),
             cursor_id : *(cursor_id_addr as *i64),
             start : *(start_addr as *i32),

@@ -13,37 +13,51 @@
  * limitations under the License.
  */
 
+use std::int::*;
+use extra::treemap::*;
+
 use bson::encode::*;
+use bson::formattable::*;
 
 /**
  * Utility module for use internal and external to crate.
  * Users must access functionality for proper use of options, etc.
  */
 
+#[deriving(Clone,Eq)]
 pub struct MongoErr {
     //err_code : int,
     err_type : ~str,
     err_name : ~str,
     err_msg : ~str,
+    // TODO: error codes for finer granularity of error provenance (than
+    //      just a bunch of strings, e.g. connection error, run_command
+    //      error, BSON parsing error, etc.)
 }
 
 /**
- * MongoErr to propagate errors; would be called Err except that's
- * taken by Rust...
+ * MongoErr to propagate errors.
  */
 impl MongoErr {
     /**
-     * Create a new MongoErr of given type (e.g. "connection", "query"),
+     * Creates a new MongoErr of given type (e.g. "connection", "query"),
      * name (more specific error), and msg (description of error).
      */
     pub fn new(typ : ~str, name : ~str, msg : ~str) -> MongoErr {
         MongoErr { err_type : typ, err_name : name, err_msg : msg }
     }
+
+    /**
+     * Like to_str, but omits staring "ERR | ".
+     */
+    pub fn tail(&self) -> ~str {
+        fmt!("%s | %s => %s", self.err_type, self.err_name, self.err_msg)
+    }
 }
 
 impl ToStr for MongoErr {
     /**
-     * Print a MongoErr to string in a standard format.
+     * Prints a MongoErr to string in a standard format.
      */
     pub fn to_str(&self) -> ~str {
         fmt!("ERR | %s | %s => %s", self.err_type, self.err_name, self.err_msg)
@@ -111,52 +125,120 @@ pub enum REPLY_FLAG {
     AWAIT_CAPABLE = 1 << 3,
 }
 
-pub enum WRITE_CONCERN {
-    JOURNAL(bool),      // wait for next journal commit?
-    W_N(int),           // replicate to how many? (number)
-    W_STR(~str),        // replicate to how many? (string, e.g. "majority")
-    //W_TAGSET(~str),     // replicate to what tagset? (string to parse)
-    WTIMEOUT(int),      // timeout after how many ms?
-    FSYNC(bool),        // wait for write to disk?
-}
-
 pub enum QuerySpec {
     SpecObj(BsonDocument),
     SpecNotation(~str)
 }
-// TODO read preference
-
-/**
- * Indexing.
- */
-pub enum INDEX_ORDER {
-    ASC = 1,
-    DESC = -1,
+impl ToStr for QuerySpec {
+    pub fn to_str(&self) -> ~str {
+        match self {
+            &SpecObj(ref bson) => bson.fields.to_str(),
+            &SpecNotation(ref s) => s.clone(),
+        }
+    }
 }
 
-pub enum INDEX_FLAG {
-    BACKGROUND = 1 << 0,
-    UNIQUE = 1 << 1,
-    DROP_DUPS = 1 << 2,
-    SPARSE = 1 << 3,
+#[deriving(Eq)]
+pub struct TagSet {
+    tags : TreeMap<~str, ~str>,
+}
+impl Clone for TagSet {
+    pub fn clone(&self) -> TagSet {
+        let mut tags = TreeMap::new();
+        for self.tags.iter().advance |(&k,&v)| {
+            tags.insert(k, v);
+        }
+        TagSet { tags : tags }
+    }
+}
+impl BsonFormattable for TagSet {
+    pub fn to_bson_t(&self) -> Document {
+        let mut ts_doc = BsonDocument::new();
+        for self.tags.iter().advance |(&k,&v)| {
+            ts_doc.put(k, UString(v));
+        }
+        Embedded(~ts_doc)
+    }
+    pub fn from_bson_t(doc : &Document) -> Result<TagSet, ~str> {
+        let mut ts = TagSet::new(~[]);
+        match doc {
+            &Embedded(ref bson_doc) => {
+                for bson_doc.fields.iter().advance |&(@k,@v)| {
+                    match v {
+                        UString(s) => ts.set(k,s),
+                        _ => return Err(~"not TagSet struct (val not UString)"),
+                    }
+                }
+            }
+            _ => return Err(~"not TagSet struct (not Embedded BsonDocument)"),
+        }
+        Ok(ts)
+    }
+}
+impl TagSet {
+    pub fn new(tag_list : &[(&str, &str)]) -> TagSet {
+        let mut tags = TreeMap::new();
+        for tag_list.iter().advance |&(field, val)| {
+            tags.insert(field.to_owned(), val.to_owned());
+        }
+        TagSet { tags : tags }
+    }
+
+    pub fn get_ref<'a>(&'a self, field : ~str) -> Option<&'a ~str> {
+        self.tags.find(&field)
+    }
+
+    pub fn get_mut_ref<'a>(&'a mut self, field : ~str) -> Option<&'a mut ~str> {
+        self.tags.find_mut(&field)
+    }
+
+    /**
+     * Sets tag in TagSet, whether or not it existed previously.
+     */
+    pub fn set(&mut self, field : ~str, val : ~str) {
+        self.tags.remove(&field);
+        if val.len() != 0 {
+            self.tags.insert(field, val);
+        }
+    }
+
+    /**
+     * Returns if self matches the other TagSet,
+     * i.e. if all of the other TagSet's tags are
+     * in self's TagSet.
+     *
+     * Usage: member.matches(tagset)
+     */
+    pub fn matches(&self, other : &TagSet) -> bool {
+        for other.tags.iter().advance |(f0, &v0)| {
+            match self.tags.find(f0) {
+                None => return false,
+                Some(v1) => {
+                    if v0 != *v1 { return false; }
+                }
+            }
+        }
+
+        true
+    }
 }
 
-pub enum INDEX_OPTION {
-    INDEX_NAME(~str),
-    EXPIRE_AFTER_SEC(int),
-    VERS(int),
+pub enum WRITE_CONCERN {
+    JOURNAL(bool),      // wait for next journal commit?
+    W_N(int),           // replicate to how many? (number)
+    W_STR(~str),        // replicate to how many? (string, e.g. "majority")
+    W_TAGSET(TagSet),   // replicate to what tagset?
+    WTIMEOUT(int),      // timeout after how many ms?
+    FSYNC(bool),        // wait for write to disk?
 }
 
-pub enum INDEX_GEOTYPE {
-    SPHERICAL,                          // "2dsphere"
-    FLAT,                               // "2d"
-}
-
-pub enum INDEX_FIELD {
-    NORMAL(~[(~str, INDEX_ORDER)]),
-    HASHED(~str),
-    GEOSPATIAL(~str, INDEX_GEOTYPE),
-    GEOHAYSTACK(~str, ~str, uint),
+#[deriving(Clone, Eq)]
+pub enum READ_PREFERENCE {
+    PRIMARY_ONLY,
+    PRIMARY_PREF(Option<~[TagSet]>),
+    SECONDARY_ONLY(Option<~[TagSet]>),
+    SECONDARY_PREF(Option<~[TagSet]>),
+    NEAREST(Option<~[TagSet]>),
 }
 
 /**
@@ -177,18 +259,22 @@ pub enum COLLECTION_OPTION {
  */
 pub static LITTLE_ENDIAN_TRUE : bool = true;
 pub static MONGO_DEFAULT_PORT : uint = 27017;
+pub static MONGO_RECONN_MSECS : u64 = (1000*3);
+pub static MONGO_TIMEOUT_SECS : u64 = 30; // XXX units...
+pub static LOCALHOST : &'static str = &'static "127.0.0.1"; // XXX tmp
 
 /// INTERNAL UTILITIES
 /**
- * Special collections for database operations, but users should not
+ * Special collections for database operations, but generally, users should not
  * access directly.
  */
 pub static SYSTEM_NAMESPACE : &'static str = &'static "system.namespaces";
 pub static SYSTEM_INDEX : &'static str = &'static "system.indexes";
 pub static SYSTEM_PROFILE : &'static str = &'static "system.profile";
-pub static SYSTEM_USER : &'static str = &'static "system.users";
+pub static SYSTEM_USERS : &'static str = &'static "system.users";
 pub static SYSTEM_COMMAND : &'static str = &'static "$cmd";
 pub static SYSTEM_JS : &'static str = &'static "system.js";
+pub static SYSTEM_REPLSET : &'static str = &'static "system.replset";
 
 // macro for compressing options array into single i32 flag
 macro_rules! process_flags(
@@ -203,3 +289,25 @@ macro_rules! process_flags(
         }
     );
 )
+
+pub fn parse_host(host_str : &~str) -> Result<(~str, uint), MongoErr> {
+    let mut port_str = fmt!("%?", MONGO_DEFAULT_PORT);
+    let mut ip_str = match host_str.find_str(":") {
+        None => host_str.to_owned(),
+        Some(i) => {
+            port_str = host_str.slice_from(i+1).to_owned();
+            host_str.slice_to(i).to_owned()
+        }
+    };
+
+    if ip_str == ~"localhost" { ip_str = LOCALHOST.to_owned(); }    // XXX must exist better soln
+
+    match from_str(port_str) {
+        None => Err(MongoErr::new(
+                        ~"conn_replica::parse_host",
+                        ~"unexpected host string format",
+                        fmt!("host string should be \"[IP ~str]:[uint]\",
+                                    found %s:%s", ip_str, port_str))),
+        Some(k) => Ok((ip_str, k as uint)),
+    }
+}
