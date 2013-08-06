@@ -331,8 +331,6 @@ let myfoo = BsonFormattable::from_bson_t::<Foo>(&Embedded(~decode(b).unwrap()));
 
 ## Roadmap
 
-- Replication set support
-- Implement read preferences
 - Documentation to the [API site](http://api.mongodb.org)
 - Thorough test suite for CRUD functionality
 
