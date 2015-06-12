@@ -7,6 +7,7 @@ use std::net::TcpStream;
 // Not prefixing this with "#[test]" since it requires both a server to be
 // running locally and the correct database state to pass, and we don't want
 // Travis to fail.
+#[test]
 fn wire_protocol() {
     match TcpStream::connect("localhost:27017") {
         Ok(mut stream) => {
