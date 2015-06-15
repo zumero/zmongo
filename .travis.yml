@@ -12,7 +12,7 @@ before_install:
     - sudo make install
     - sudo ldconfig /usr/local/lib
 
-before_script: "echo \"db.test.insert({ foo: 42 }); db.getSiblingDB('sample').movies.insert({ title: 'Jaws' });\" | mongo"
+before_script: "db.getSiblingDB('sample').movies.insert({ title: 'Jaws' });\" | mongo"
 
 script:
     - cargo build --verbose
