@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Message` enum in crate `mongodb`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Message">
+
+    <title>mongodb::wire_protocol::operations::Message - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../../index.html'>mongodb</a>::<wbr><a href='../index.html'>wire_protocol</a>::<wbr><a href='index.html'>operations</a></p><script>window.sidebarCurrent = {name: 'Message', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../../index.html'>mongodb</a>::<wbr><a href='../index.html'>wire_protocol</a>::<wbr><a href='index.html'>operations</a>::<wbr><a class='enum' href=''>Message</a><wbr></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-35035' href='../../../src/mongodb/wire_protocol/operations.rs.html#35-105'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Message {
+    OpReply {
+        header: Header,
+        flags: <a class='struct' href='../../../mongodb/wire_protocol/flags/struct.OpReplyFlags.html' title='mongodb::wire_protocol::flags::OpReplyFlags'>OpReplyFlags</a>,
+        cursor_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>,
+        starting_from: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>,
+        number_returned: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>,
+        documents: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;Document&gt;,
+    },
+    OpUpdate {
+        header: Header,
+        namespace: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        flags: <a class='struct' href='../../../mongodb/wire_protocol/flags/struct.OpUpdateFlags.html' title='mongodb::wire_protocol::flags::OpUpdateFlags'>OpUpdateFlags</a>,
+        selector: Document,
+        update: Document,
+    },
+    OpInsert {
+        header: Header,
+        flags: <a class='struct' href='../../../mongodb/wire_protocol/flags/struct.OpInsertFlags.html' title='mongodb::wire_protocol::flags::OpInsertFlags'>OpInsertFlags</a>,
+        namespace: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        documents: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;Document&gt;,
+    },
+    OpQuery {
+        header: Header,
+        flags: <a class='struct' href='../../../mongodb/wire_protocol/flags/struct.OpQueryFlags.html' title='mongodb::wire_protocol::flags::OpQueryFlags'>OpQueryFlags</a>,
+        namespace: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        number_to_skip: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>,
+        number_to_return: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>,
+        query: Document,
+        return_field_selector: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Document&gt;,
+    },
+    OpGetMore {
+        header: Header,
+        namespace: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        number_to_return: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>,
+        cursor_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>,
+    },
+}</pre><div class='docblock'><p>Represents a message in the MongoDB Wire Protocol.</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.OpReply'><a class='stability Unmarked' title='No stability level'></a><code>OpReply</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.OpReply.field.header'><code>header</code></td><td><div class='docblock'><p>The message header.</p>
+</div></td></tr><tr><td id='variant.OpReply.field.flags'><code>flags</code></td><td><div class='docblock'><p>A Bit vector of reply options.</p>
+</div></td></tr><tr><td id='variant.OpReply.field.cursor_id'><code>cursor_id</code></td><td><div class='docblock'><p>Uniquely identifies the cursor being returned.</p>
+</div></td></tr><tr><td id='variant.OpReply.field.starting_from'><code>starting_from</code></td><td><div class='docblock'><p>The starting position for the cursor.</p>
+</div></td></tr><tr><td id='variant.OpReply.field.number_returned'><code>number_returned</code></td><td><div class='docblock'><p>The total number of documents being returned.</p>
+</div></td></tr><tr><td id='variant.OpReply.field.documents'><code>documents</code></td><td><div class='docblock'><p>The documents being returned.</p>
+</div></td></tr></table></td></tr><tr><td id='variant.OpUpdate'><a class='stability Unmarked' title='No stability level'></a><code>OpUpdate</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.OpUpdate.field.header'><code>header</code></td><td><div class='docblock'><p>The message header.</p>
+</div></td></tr><tr><td id='variant.OpUpdate.field.namespace'><code>namespace</code></td><td><div class='docblock'><p>The full qualified name of the collection, beginning with the
+database name and a dot separator.</p>
+</div></td></tr><tr><td id='variant.OpUpdate.field.flags'><code>flags</code></td><td><div class='docblock'><p>A bit vector of update options.</p>
+</div></td></tr><tr><td id='variant.OpUpdate.field.selector'><code>selector</code></td><td><div class='docblock'><p>Identifies the document(s) to be updated.</p>
+</div></td></tr><tr><td id='variant.OpUpdate.field.update'><code>update</code></td><td><div class='docblock'><p>Instruction document for how to update the document(s).</p>
+</div></td></tr></table></td></tr><tr><td id='variant.OpInsert'><a class='stability Unmarked' title='No stability level'></a><code>OpInsert</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.OpInsert.field.header'><code>header</code></td><td><div class='docblock'><p>The message header.</p>
+</div></td></tr><tr><td id='variant.OpInsert.field.flags'><code>flags</code></td><td><div class='docblock'><p>A bit vector of insert options.</p>
+</div></td></tr><tr><td id='variant.OpInsert.field.namespace'><code>namespace</code></td><td><div class='docblock'><p>The full qualified name of the collection, beginning with the
+database name and a dot separator.</p>
+</div></td></tr><tr><td id='variant.OpInsert.field.documents'><code>documents</code></td><td><div class='docblock'><p>The documents to be inserted.</p>
+</div></td></tr></table></td></tr><tr><td id='variant.OpQuery'><a class='stability Unmarked' title='No stability level'></a><code>OpQuery</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.OpQuery.field.header'><code>header</code></td><td><div class='docblock'><p>The message header.</p>
+</div></td></tr><tr><td id='variant.OpQuery.field.flags'><code>flags</code></td><td><div class='docblock'><p>A bit vector of query options.</p>
+</div></td></tr><tr><td id='variant.OpQuery.field.namespace'><code>namespace</code></td><td><div class='docblock'><p>The full qualified name of the collection, beginning with the
+database name and a dot separator.</p>
+</div></td></tr><tr><td id='variant.OpQuery.field.number_to_skip'><code>number_to_skip</code></td><td><div class='docblock'><p>The number of initial documents to skip over in the query results.</p>
+</div></td></tr><tr><td id='variant.OpQuery.field.number_to_return'><code>number_to_return</code></td><td><div class='docblock'><p>The total number of documents that should be returned by the query.</p>
+</div></td></tr><tr><td id='variant.OpQuery.field.query'><code>query</code></td><td><div class='docblock'><p>Specifies which documents to return.</p>
+</div></td></tr><tr><td id='variant.OpQuery.field.return_field_selector'><code>return_field_selector</code></td><td><div class='docblock'><p>An optional projection of which fields should be present in the
+documents to be returned by the query.</p>
+</div></td></tr></table></td></tr><tr><td id='variant.OpGetMore'><a class='stability Unmarked' title='No stability level'></a><code>OpGetMore</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.OpGetMore.field.header'><code>header</code></td><td><div class='docblock'><p>The message header.</p>
+</div></td></tr><tr><td id='variant.OpGetMore.field.namespace'><code>namespace</code></td><td><div class='docblock'><p>The full qualified name of the collection, beginning with the
+database name and a dot separator.</p>
+</div></td></tr><tr><td id='variant.OpGetMore.field.number_to_return'><code>number_to_return</code></td><td><div class='docblock'><p>The total number of documents that should be returned by the query.</p>
+</div></td></tr><tr><td id='variant.OpGetMore.field.cursor_id'><code>cursor_id</code></td><td><div class='docblock'><p>Uniquely identifies the cursor being returned.</p>
+</div></td></tr></table></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='enum' href='../../../mongodb/wire_protocol/operations/enum.Message.html' title='mongodb::wire_protocol::operations::Message'>Message</a></code></h3><div class='impl-items'><h4 id='method.new_update' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.new_update' class='fnname'>new_update</a>(request_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, namespace: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, flags: <a class='struct' href='../../../mongodb/wire_protocol/flags/struct.OpUpdateFlags.html' title='mongodb::wire_protocol::flags::OpUpdateFlags'>OpUpdateFlags</a>, selector: Document, update: Document) -&gt; <a class='type' href='../../../mongodb/error/type.Result.html' title='mongodb::error::Result'>Result</a>&lt;<a class='enum' href='../../../mongodb/wire_protocol/operations/enum.Message.html' title='mongodb::wire_protocol::operations::Message'>Message</a>&gt;</code></h4>
+<div class='docblock'><p>Constructs a new message for an update.</p>
+</div><h4 id='method.new_insert' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.new_insert' class='fnname'>new_insert</a>(request_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, flags: <a class='struct' href='../../../mongodb/wire_protocol/flags/struct.OpInsertFlags.html' title='mongodb::wire_protocol::flags::OpInsertFlags'>OpInsertFlags</a>, namespace: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, documents: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;Document&gt;) -&gt; <a class='type' href='../../../mongodb/error/type.Result.html' title='mongodb::error::Result'>Result</a>&lt;<a class='enum' href='../../../mongodb/wire_protocol/operations/enum.Message.html' title='mongodb::wire_protocol::operations::Message'>Message</a>&gt;</code></h4>
+<div class='docblock'><p>Constructs a new message request for an insertion.</p>
+</div><h4 id='method.new_query' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.new_query' class='fnname'>new_query</a>(request_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, flags: <a class='struct' href='../../../mongodb/wire_protocol/flags/struct.OpQueryFlags.html' title='mongodb::wire_protocol::flags::OpQueryFlags'>OpQueryFlags</a>, namespace: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, number_to_skip: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, number_to_return: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, query: Document, return_field_selector: <a class='enum' href='http://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Document&gt;) -&gt; <a class='type' href='../../../mongodb/error/type.Result.html' title='mongodb::error::Result'>Result</a>&lt;<a class='enum' href='../../../mongodb/wire_protocol/operations/enum.Message.html' title='mongodb::wire_protocol::operations::Message'>Message</a>&gt;</code></h4>
+<div class='docblock'><p>Constructs a new message request for a query.</p>
+</div><h4 id='method.new_get_more' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.new_get_more' class='fnname'>new_get_more</a>(request_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, namespace: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, number_to_return: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, cursor_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>) -&gt; <a class='enum' href='../../../mongodb/wire_protocol/operations/enum.Message.html' title='mongodb::wire_protocol::operations::Message'>Message</a></code></h4>
+<div class='docblock'><p>Constructs a new &quot;get more&quot; request message.</p>
+</div><h4 id='method.write_update' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.write_update' class='fnname'>write_update</a>(buffer: &amp;mut <a class='trait' href='http://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a>, header: &amp;Header, namespace: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, flags: &amp;<a class='struct' href='../../../mongodb/wire_protocol/flags/struct.OpUpdateFlags.html' title='mongodb::wire_protocol::flags::OpUpdateFlags'>OpUpdateFlags</a>, selector: &amp;Document, update: &amp;Document) -&gt; <a class='type' href='../../../mongodb/error/type.Result.html' title='mongodb::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Writes a serialized update message to a given buffer.</p>
+
+<h1 id="arguments" class='section-header'><a
+                           href="#arguments">Arguments</a></h1>
+<p><code>buffer</code> - The buffer to write to.
+<code>header</code> - The header for the given message.
+<code>namespace</code> - The full qualified name of the collection, beginning with
+              the database name and a dot.
+<code>flags</code> - Bit vector of query option.
+<code>selector</code> - Identifies the document(s) to be updated.
+<code>update</code> - Instructs how to update the document(s).</p>
+
+<h1 id="return-value" class='section-header'><a
+                           href="#return-value">Return value</a></h1>
+<p>Returns nothing on success, or an Error on failure.</p>
+</div><h4 id='method.write_get_more' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.write_get_more' class='fnname'>write_get_more</a>(buffer: &amp;mut <a class='trait' href='http://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a>, header: &amp;Header, namespace: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, number_to_return: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>, cursor_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>) -&gt; <a class='type' href='../../../mongodb/error/type.Result.html' title='mongodb::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Writes a serialized &quot;get more&quot; request to a given buffer.</p>
+
+<h1 id="arguments" class='section-header'><a
+                           href="#arguments">Arguments</a></h1>
+<p><code>buffer</code> - The buffer to write to.
+<code>header</code> - The header for the given message.
+<code>namespace</code> - The full qualified name of the collection, beginning with
+              the database name and a dot.
+<code>number_to_return - The total number of documents that should be returned by the query.</code>cursor_id` - Specifies which cursor to get more documents from.</p>
+
+<h1 id="return-value" class='section-header'><a
+                           href="#return-value">Return value</a></h1>
+<p>Returns nothing on success, or an Error on failure.</p>
+</div><h4 id='method.write' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.write' class='fnname'>write</a>(&amp;self, buffer: &amp;mut <a class='trait' href='http://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a>) -&gt; <a class='type' href='../../../mongodb/error/type.Result.html' title='mongodb::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
+<div class='docblock'><p>Attemps to write the serialized message to a buffer.</p>
+
+<h1 id="arguments" class='section-header'><a
+                           href="#arguments">Arguments</a></h1>
+<p><code>buffer</code> - The buffer to write to.</p>
+
+<h1 id="return-value" class='section-header'><a
+                           href="#return-value">Return value</a></h1>
+<p>Returns nothing on success, or an error string on failure.</p>
+</div><h4 id='method.read' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.read' class='fnname'>read</a>&lt;T&gt;(buffer: &amp;mut T) -&gt; <a class='type' href='../../../mongodb/error/type.Result.html' title='mongodb::error::Result'>Result</a>&lt;<a class='enum' href='../../../mongodb/wire_protocol/operations/enum.Message.html' title='mongodb::wire_protocol::operations::Message'>Message</a>&gt; <span class='where'>where T: <a class='trait' href='http://doc.rust-lang.org/nightly/std/io/trait.Read.html' title='std::io::Read'>Read</a> + <a class='trait' href='http://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a></span></code></h4>
+<div class='docblock'><p>Attempts to read a serialized reply Message from a buffer.</p>
+
+<h1 id="arguments" class='section-header'><a
+                           href="#arguments">Arguments</a></h1>
+<p><code>buffer</code> - The buffer to read from.</p>
+
+<h1 id="return-value" class='section-header'><a
+                           href="#return-value">Return value</a></h1>
+<p>Returns the reply message on success, or an Error on failure.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "mongodb";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

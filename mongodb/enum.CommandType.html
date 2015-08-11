@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `CommandType` enum in crate `mongodb`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, CommandType">
+
+    <title>mongodb::CommandType - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='index.html'>mongodb</a></p><script>window.sidebarCurrent = {name: 'CommandType', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='index.html'>mongodb</a>::<wbr><a class='enum' href=''>CommandType</a><wbr></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-38721' href='../src/mongodb/command_type.rs.html#5-34'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum CommandType {
+    Aggregate,
+    Count,
+    CreateCollection,
+    CreateIndexes,
+    CreateUser,
+    DeleteMany,
+    DeleteOne,
+    Distinct,
+    DropAllUsers,
+    DropCollection,
+    DropDatabase,
+    DropIndexes,
+    DropUser,
+    Find,
+    FindOneAndDelete,
+    FindOneAndReplace,
+    FindOneAndUpdate,
+    GetUser,
+    GetUsers,
+    InsertMany,
+    InsertOne,
+    IsMaster,
+    ListCollections,
+    ListDatabases,
+    ListIndexes,
+    Suppressed,
+    UpdateMany,
+    UpdateOne,
+}</pre><div class='docblock'><p>Executable command types that can be monitored by the driver.</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.Aggregate'><a class='stability Unmarked' title='No stability level'></a><code>Aggregate</code></td><td></td></tr><tr><td id='variant.Count'><a class='stability Unmarked' title='No stability level'></a><code>Count</code></td><td></td></tr><tr><td id='variant.CreateCollection'><a class='stability Unmarked' title='No stability level'></a><code>CreateCollection</code></td><td></td></tr><tr><td id='variant.CreateIndexes'><a class='stability Unmarked' title='No stability level'></a><code>CreateIndexes</code></td><td></td></tr><tr><td id='variant.CreateUser'><a class='stability Unmarked' title='No stability level'></a><code>CreateUser</code></td><td></td></tr><tr><td id='variant.DeleteMany'><a class='stability Unmarked' title='No stability level'></a><code>DeleteMany</code></td><td></td></tr><tr><td id='variant.DeleteOne'><a class='stability Unmarked' title='No stability level'></a><code>DeleteOne</code></td><td></td></tr><tr><td id='variant.Distinct'><a class='stability Unmarked' title='No stability level'></a><code>Distinct</code></td><td></td></tr><tr><td id='variant.DropAllUsers'><a class='stability Unmarked' title='No stability level'></a><code>DropAllUsers</code></td><td></td></tr><tr><td id='variant.DropCollection'><a class='stability Unmarked' title='No stability level'></a><code>DropCollection</code></td><td></td></tr><tr><td id='variant.DropDatabase'><a class='stability Unmarked' title='No stability level'></a><code>DropDatabase</code></td><td></td></tr><tr><td id='variant.DropIndexes'><a class='stability Unmarked' title='No stability level'></a><code>DropIndexes</code></td><td></td></tr><tr><td id='variant.DropUser'><a class='stability Unmarked' title='No stability level'></a><code>DropUser</code></td><td></td></tr><tr><td id='variant.Find'><a class='stability Unmarked' title='No stability level'></a><code>Find</code></td><td></td></tr><tr><td id='variant.FindOneAndDelete'><a class='stability Unmarked' title='No stability level'></a><code>FindOneAndDelete</code></td><td></td></tr><tr><td id='variant.FindOneAndReplace'><a class='stability Unmarked' title='No stability level'></a><code>FindOneAndReplace</code></td><td></td></tr><tr><td id='variant.FindOneAndUpdate'><a class='stability Unmarked' title='No stability level'></a><code>FindOneAndUpdate</code></td><td></td></tr><tr><td id='variant.GetUser'><a class='stability Unmarked' title='No stability level'></a><code>GetUser</code></td><td></td></tr><tr><td id='variant.GetUsers'><a class='stability Unmarked' title='No stability level'></a><code>GetUsers</code></td><td></td></tr><tr><td id='variant.InsertMany'><a class='stability Unmarked' title='No stability level'></a><code>InsertMany</code></td><td></td></tr><tr><td id='variant.InsertOne'><a class='stability Unmarked' title='No stability level'></a><code>InsertOne</code></td><td></td></tr><tr><td id='variant.IsMaster'><a class='stability Unmarked' title='No stability level'></a><code>IsMaster</code></td><td></td></tr><tr><td id='variant.ListCollections'><a class='stability Unmarked' title='No stability level'></a><code>ListCollections</code></td><td></td></tr><tr><td id='variant.ListDatabases'><a class='stability Unmarked' title='No stability level'></a><code>ListDatabases</code></td><td></td></tr><tr><td id='variant.ListIndexes'><a class='stability Unmarked' title='No stability level'></a><code>ListIndexes</code></td><td></td></tr><tr><td id='variant.Suppressed'><a class='stability Unmarked' title='No stability level'></a><code>Suppressed</code></td><td></td></tr><tr><td id='variant.UpdateMany'><a class='stability Unmarked' title='No stability level'></a><code>UpdateMany</code></td><td></td></tr><tr><td id='variant.UpdateOne'><a class='stability Unmarked' title='No stability level'></a><code>UpdateOne</code></td><td></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='enum' href='../mongodb/enum.CommandType.html' title='mongodb::CommandType'>CommandType</a></code></h3><div class='impl-items'><h4 id='method.to_str' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.to_str' class='fnname'>to_str</a>(&amp;self) -&gt; &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></h4>
+<h4 id='method.is_write_command' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.is_write_command' class='fnname'>is_write_command</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../mongodb/enum.CommandType.html' title='mongodb::CommandType'>CommandType</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../mongodb/enum.CommandType.html' title='mongodb::CommandType'>CommandType</a></code></h4>
+<h4 id='method.clone_from' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='enum' href='../mongodb/enum.CommandType.html' title='mongodb::CommandType'>CommandType</a></code></h3><div class='impl-items'></div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../mongodb/enum.CommandType.html' title='mongodb::CommandType'>CommandType</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../mongodb/enum.CommandType.html' title='mongodb::CommandType'>CommandType</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../mongodb/enum.CommandType.html' title='mongodb::CommandType'>CommandType</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "mongodb";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script async src="../search-index.js"></script>
+</body>
+</html>

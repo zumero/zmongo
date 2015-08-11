@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ErrorCode` enum in crate `mongodb`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ErrorCode">
+
+    <title>mongodb::error::ErrorCode - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../index.html'>mongodb</a>::<wbr><a href='index.html'>error</a></p><script>window.sidebarCurrent = {name: 'ErrorCode', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>mongodb</a>::<wbr><a href='index.html'>error</a>::<wbr><a class='enum' href=''>ErrorCode</a><wbr></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-17557' href='../../src/mongodb/error.rs.html#221-376'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum ErrorCode {
+    OK,
+    InternalError,
+    BadValue,
+    OBSOLETE_DuplicateKey,
+    NoSuchKey,
+    GraphContainsCycle,
+    HostUnreachable,
+    HostNotFound,
+    UnknownError,
+    FailedToParse,
+    CannotMutateObject,
+    UserNotFound,
+    UnsupportedFormat,
+    Unauthorized,
+    TypeMismatch,
+    Overflow,
+    InvalidLength,
+    ProtocolError,
+    AuthenticationFailed,
+    CannotReuseObject,
+    IllegalOperation,
+    EmptyArrayOperation,
+    InvalidBSON,
+    AlreadyInitialized,
+    LockTimeout,
+    RemoteValidationError,
+    NamespaceNotFound,
+    IndexNotFound,
+    PathNotViable,
+    NonExistentPath,
+    InvalidPath,
+    RoleNotFound,
+    RolesNotRelated,
+    PrivilegeNotFound,
+    CannotBackfillArray,
+    UserModificationFailed,
+    RemoteChangeDetected,
+    FileRenameFailed,
+    FileNotOpen,
+    FileStreamFailed,
+    ConflictingUpdateOperators,
+    FileAlreadyOpen,
+    LogWriteFailed,
+    CursorNotFound,
+    UserDataInconsistent,
+    LockBusy,
+    NoMatchingDocument,
+    NamespaceExists,
+    InvalidRoleModification,
+    ExceededTimeLimit,
+    ManualInterventionRequired,
+    DollarPrefixedFieldName,
+    InvalidIdField,
+    NotSingleValueField,
+    InvalidDBRef,
+    EmptyFieldName,
+    DottedFieldName,
+    RoleModificationFailed,
+    CommandNotFound,
+    DatabaseNotFound,
+    ShardKeyNotFound,
+    OplogOperationUnsupported,
+    StaleShardVersion,
+    WriteConcernFailed,
+    MultipleErrorsOccurred,
+    ImmutableField,
+    CannotCreateIndex,
+    IndexAlreadyExists,
+    AuthSchemaIncompatible,
+    ShardNotFound,
+    ReplicaSetNotFound,
+    InvalidOptions,
+    InvalidNamespace,
+    NodeNotFound,
+    WriteConcernLegacyOK,
+    NoReplicationEnabled,
+    OperationIncomplete,
+    CommandResultSchemaViolation,
+    UnknownReplWriteConcern,
+    RoleDataInconsistent,
+    NoWhereParseContext,
+    NoProgressMade,
+    RemoteResultsUnavailable,
+    DuplicateKeyValue,
+    IndexOptionsConflict,
+    IndexKeySpecsConflict,
+    CannotSplit,
+    SplitFailed,
+    NetworkTimeout,
+    CallbackCanceled,
+    ShutdownInProgress,
+    SecondaryAheadOfPrimary,
+    InvalidReplicaSetConfig,
+    NotYetInitialized,
+    NotSecondary,
+    OperationFailed,
+    NoProjectionFound,
+    DBPathInUse,
+    WriteConcernNotDefined,
+    CannotSatisfyWriteConcern,
+    OutdatedClient,
+    IncompatibleAuditMetadata,
+    NewReplicaSetConfigurationIncompatible,
+    NodeNotElectable,
+    IncompatibleShardingMetadata,
+    DistributedClockSkewed,
+    LockFailed,
+    InconsistentReplicaSetNames,
+    ConfigurationInProgress,
+    CannotInitializeNodeWithData,
+    NotExactValueField,
+    WriteConflict,
+    InitialSyncFailure,
+    InitialSyncOplogSourceMissing,
+    CommandNotSupported,
+    DocTooLargeForCapped,
+    ConflictingOperationInProgress,
+    NamespaceNotSharded,
+    InvalidSyncSource,
+    OplogStartMissing,
+    DocumentValidationFailure,
+    OBSOLETE_ReadAfterOptimeTimeout,
+    NotAReplicaSet,
+    IncompatibleElectionProtocol,
+    CommandFailed,
+    RPCProtocolNegotiationFailed,
+    UnrecoverableRollbackError,
+    LockNotFound,
+    LockStateChangeFailed,
+    SymbolNotFound,
+    RLPInitializationFailed,
+    ConfigServersInconsistent,
+    FailedToSatisfyReadPreference,
+    XXX_TEMP_NAME_ReadCommittedCurrentlyUnavailable,
+    StaleTerm,
+    CappedPositionLost,
+    IncompatibleShardingConfigVersion,
+    RemoteOplogStale,
+    JSInterpreterFailure,
+    NotMaster,
+    DuplicateKey,
+    InterruptedAtShutdown,
+    Interrupted,
+    BackgroundOperationInProgressForDatabase,
+    BackgroundOperationInProgressForNamespace,
+    PrepareConfigsFailedCode,
+    DatabaseDifferCase,
+    ShardKeyTooBig,
+    SendStaleConfig,
+    NotMasterNoSlaveOkCode,
+    NotMasterOrSecondaryCode,
+    OutOfDiskSpace,
+    KeyTooLong,
+    MaxError,
+}</pre><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.OK'><a class='stability Unmarked' title='No stability level'></a><code>OK</code></td><td></td></tr><tr><td id='variant.InternalError'><a class='stability Unmarked' title='No stability level'></a><code>InternalError</code></td><td></td></tr><tr><td id='variant.BadValue'><a class='stability Unmarked' title='No stability level'></a><code>BadValue</code></td><td></td></tr><tr><td id='variant.OBSOLETE_DuplicateKey'><a class='stability Unmarked' title='No stability level'></a><code>OBSOLETE_DuplicateKey</code></td><td></td></tr><tr><td id='variant.NoSuchKey'><a class='stability Unmarked' title='No stability level'></a><code>NoSuchKey</code></td><td></td></tr><tr><td id='variant.GraphContainsCycle'><a class='stability Unmarked' title='No stability level'></a><code>GraphContainsCycle</code></td><td></td></tr><tr><td id='variant.HostUnreachable'><a class='stability Unmarked' title='No stability level'></a><code>HostUnreachable</code></td><td></td></tr><tr><td id='variant.HostNotFound'><a class='stability Unmarked' title='No stability level'></a><code>HostNotFound</code></td><td></td></tr><tr><td id='variant.UnknownError'><a class='stability Unmarked' title='No stability level'></a><code>UnknownError</code></td><td></td></tr><tr><td id='variant.FailedToParse'><a class='stability Unmarked' title='No stability level'></a><code>FailedToParse</code></td><td></td></tr><tr><td id='variant.CannotMutateObject'><a class='stability Unmarked' title='No stability level'></a><code>CannotMutateObject</code></td><td></td></tr><tr><td id='variant.UserNotFound'><a class='stability Unmarked' title='No stability level'></a><code>UserNotFound</code></td><td></td></tr><tr><td id='variant.UnsupportedFormat'><a class='stability Unmarked' title='No stability level'></a><code>UnsupportedFormat</code></td><td></td></tr><tr><td id='variant.Unauthorized'><a class='stability Unmarked' title='No stability level'></a><code>Unauthorized</code></td><td></td></tr><tr><td id='variant.TypeMismatch'><a class='stability Unmarked' title='No stability level'></a><code>TypeMismatch</code></td><td></td></tr><tr><td id='variant.Overflow'><a class='stability Unmarked' title='No stability level'></a><code>Overflow</code></td><td></td></tr><tr><td id='variant.InvalidLength'><a class='stability Unmarked' title='No stability level'></a><code>InvalidLength</code></td><td></td></tr><tr><td id='variant.ProtocolError'><a class='stability Unmarked' title='No stability level'></a><code>ProtocolError</code></td><td></td></tr><tr><td id='variant.AuthenticationFailed'><a class='stability Unmarked' title='No stability level'></a><code>AuthenticationFailed</code></td><td></td></tr><tr><td id='variant.CannotReuseObject'><a class='stability Unmarked' title='No stability level'></a><code>CannotReuseObject</code></td><td></td></tr><tr><td id='variant.IllegalOperation'><a class='stability Unmarked' title='No stability level'></a><code>IllegalOperation</code></td><td></td></tr><tr><td id='variant.EmptyArrayOperation'><a class='stability Unmarked' title='No stability level'></a><code>EmptyArrayOperation</code></td><td></td></tr><tr><td id='variant.InvalidBSON'><a class='stability Unmarked' title='No stability level'></a><code>InvalidBSON</code></td><td></td></tr><tr><td id='variant.AlreadyInitialized'><a class='stability Unmarked' title='No stability level'></a><code>AlreadyInitialized</code></td><td></td></tr><tr><td id='variant.LockTimeout'><a class='stability Unmarked' title='No stability level'></a><code>LockTimeout</code></td><td></td></tr><tr><td id='variant.RemoteValidationError'><a class='stability Unmarked' title='No stability level'></a><code>RemoteValidationError</code></td><td></td></tr><tr><td id='variant.NamespaceNotFound'><a class='stability Unmarked' title='No stability level'></a><code>NamespaceNotFound</code></td><td></td></tr><tr><td id='variant.IndexNotFound'><a class='stability Unmarked' title='No stability level'></a><code>IndexNotFound</code></td><td></td></tr><tr><td id='variant.PathNotViable'><a class='stability Unmarked' title='No stability level'></a><code>PathNotViable</code></td><td></td></tr><tr><td id='variant.NonExistentPath'><a class='stability Unmarked' title='No stability level'></a><code>NonExistentPath</code></td><td></td></tr><tr><td id='variant.InvalidPath'><a class='stability Unmarked' title='No stability level'></a><code>InvalidPath</code></td><td></td></tr><tr><td id='variant.RoleNotFound'><a class='stability Unmarked' title='No stability level'></a><code>RoleNotFound</code></td><td></td></tr><tr><td id='variant.RolesNotRelated'><a class='stability Unmarked' title='No stability level'></a><code>RolesNotRelated</code></td><td></td></tr><tr><td id='variant.PrivilegeNotFound'><a class='stability Unmarked' title='No stability level'></a><code>PrivilegeNotFound</code></td><td></td></tr><tr><td id='variant.CannotBackfillArray'><a class='stability Unmarked' title='No stability level'></a><code>CannotBackfillArray</code></td><td></td></tr><tr><td id='variant.UserModificationFailed'><a class='stability Unmarked' title='No stability level'></a><code>UserModificationFailed</code></td><td></td></tr><tr><td id='variant.RemoteChangeDetected'><a class='stability Unmarked' title='No stability level'></a><code>RemoteChangeDetected</code></td><td></td></tr><tr><td id='variant.FileRenameFailed'><a class='stability Unmarked' title='No stability level'></a><code>FileRenameFailed</code></td><td></td></tr><tr><td id='variant.FileNotOpen'><a class='stability Unmarked' title='No stability level'></a><code>FileNotOpen</code></td><td></td></tr><tr><td id='variant.FileStreamFailed'><a class='stability Unmarked' title='No stability level'></a><code>FileStreamFailed</code></td><td></td></tr><tr><td id='variant.ConflictingUpdateOperators'><a class='stability Unmarked' title='No stability level'></a><code>ConflictingUpdateOperators</code></td><td></td></tr><tr><td id='variant.FileAlreadyOpen'><a class='stability Unmarked' title='No stability level'></a><code>FileAlreadyOpen</code></td><td></td></tr><tr><td id='variant.LogWriteFailed'><a class='stability Unmarked' title='No stability level'></a><code>LogWriteFailed</code></td><td></td></tr><tr><td id='variant.CursorNotFound'><a class='stability Unmarked' title='No stability level'></a><code>CursorNotFound</code></td><td></td></tr><tr><td id='variant.UserDataInconsistent'><a class='stability Unmarked' title='No stability level'></a><code>UserDataInconsistent</code></td><td></td></tr><tr><td id='variant.LockBusy'><a class='stability Unmarked' title='No stability level'></a><code>LockBusy</code></td><td></td></tr><tr><td id='variant.NoMatchingDocument'><a class='stability Unmarked' title='No stability level'></a><code>NoMatchingDocument</code></td><td></td></tr><tr><td id='variant.NamespaceExists'><a class='stability Unmarked' title='No stability level'></a><code>NamespaceExists</code></td><td></td></tr><tr><td id='variant.InvalidRoleModification'><a class='stability Unmarked' title='No stability level'></a><code>InvalidRoleModification</code></td><td></td></tr><tr><td id='variant.ExceededTimeLimit'><a class='stability Unmarked' title='No stability level'></a><code>ExceededTimeLimit</code></td><td></td></tr><tr><td id='variant.ManualInterventionRequired'><a class='stability Unmarked' title='No stability level'></a><code>ManualInterventionRequired</code></td><td></td></tr><tr><td id='variant.DollarPrefixedFieldName'><a class='stability Unmarked' title='No stability level'></a><code>DollarPrefixedFieldName</code></td><td></td></tr><tr><td id='variant.InvalidIdField'><a class='stability Unmarked' title='No stability level'></a><code>InvalidIdField</code></td><td></td></tr><tr><td id='variant.NotSingleValueField'><a class='stability Unmarked' title='No stability level'></a><code>NotSingleValueField</code></td><td></td></tr><tr><td id='variant.InvalidDBRef'><a class='stability Unmarked' title='No stability level'></a><code>InvalidDBRef</code></td><td></td></tr><tr><td id='variant.EmptyFieldName'><a class='stability Unmarked' title='No stability level'></a><code>EmptyFieldName</code></td><td></td></tr><tr><td id='variant.DottedFieldName'><a class='stability Unmarked' title='No stability level'></a><code>DottedFieldName</code></td><td></td></tr><tr><td id='variant.RoleModificationFailed'><a class='stability Unmarked' title='No stability level'></a><code>RoleModificationFailed</code></td><td></td></tr><tr><td id='variant.CommandNotFound'><a class='stability Unmarked' title='No stability level'></a><code>CommandNotFound</code></td><td></td></tr><tr><td id='variant.DatabaseNotFound'><a class='stability Unmarked' title='No stability level'></a><code>DatabaseNotFound</code></td><td></td></tr><tr><td id='variant.ShardKeyNotFound'><a class='stability Unmarked' title='No stability level'></a><code>ShardKeyNotFound</code></td><td></td></tr><tr><td id='variant.OplogOperationUnsupported'><a class='stability Unmarked' title='No stability level'></a><code>OplogOperationUnsupported</code></td><td></td></tr><tr><td id='variant.StaleShardVersion'><a class='stability Unmarked' title='No stability level'></a><code>StaleShardVersion</code></td><td></td></tr><tr><td id='variant.WriteConcernFailed'><a class='stability Unmarked' title='No stability level'></a><code>WriteConcernFailed</code></td><td></td></tr><tr><td id='variant.MultipleErrorsOccurred'><a class='stability Unmarked' title='No stability level'></a><code>MultipleErrorsOccurred</code></td><td></td></tr><tr><td id='variant.ImmutableField'><a class='stability Unmarked' title='No stability level'></a><code>ImmutableField</code></td><td></td></tr><tr><td id='variant.CannotCreateIndex'><a class='stability Unmarked' title='No stability level'></a><code>CannotCreateIndex</code></td><td></td></tr><tr><td id='variant.IndexAlreadyExists'><a class='stability Unmarked' title='No stability level'></a><code>IndexAlreadyExists</code></td><td></td></tr><tr><td id='variant.AuthSchemaIncompatible'><a class='stability Unmarked' title='No stability level'></a><code>AuthSchemaIncompatible</code></td><td></td></tr><tr><td id='variant.ShardNotFound'><a class='stability Unmarked' title='No stability level'></a><code>ShardNotFound</code></td><td></td></tr><tr><td id='variant.ReplicaSetNotFound'><a class='stability Unmarked' title='No stability level'></a><code>ReplicaSetNotFound</code></td><td></td></tr><tr><td id='variant.InvalidOptions'><a class='stability Unmarked' title='No stability level'></a><code>InvalidOptions</code></td><td></td></tr><tr><td id='variant.InvalidNamespace'><a class='stability Unmarked' title='No stability level'></a><code>InvalidNamespace</code></td><td></td></tr><tr><td id='variant.NodeNotFound'><a class='stability Unmarked' title='No stability level'></a><code>NodeNotFound</code></td><td></td></tr><tr><td id='variant.WriteConcernLegacyOK'><a class='stability Unmarked' title='No stability level'></a><code>WriteConcernLegacyOK</code></td><td></td></tr><tr><td id='variant.NoReplicationEnabled'><a class='stability Unmarked' title='No stability level'></a><code>NoReplicationEnabled</code></td><td></td></tr><tr><td id='variant.OperationIncomplete'><a class='stability Unmarked' title='No stability level'></a><code>OperationIncomplete</code></td><td></td></tr><tr><td id='variant.CommandResultSchemaViolation'><a class='stability Unmarked' title='No stability level'></a><code>CommandResultSchemaViolation</code></td><td></td></tr><tr><td id='variant.UnknownReplWriteConcern'><a class='stability Unmarked' title='No stability level'></a><code>UnknownReplWriteConcern</code></td><td></td></tr><tr><td id='variant.RoleDataInconsistent'><a class='stability Unmarked' title='No stability level'></a><code>RoleDataInconsistent</code></td><td></td></tr><tr><td id='variant.NoWhereParseContext'><a class='stability Unmarked' title='No stability level'></a><code>NoWhereParseContext</code></td><td></td></tr><tr><td id='variant.NoProgressMade'><a class='stability Unmarked' title='No stability level'></a><code>NoProgressMade</code></td><td></td></tr><tr><td id='variant.RemoteResultsUnavailable'><a class='stability Unmarked' title='No stability level'></a><code>RemoteResultsUnavailable</code></td><td></td></tr><tr><td id='variant.DuplicateKeyValue'><a class='stability Unmarked' title='No stability level'></a><code>DuplicateKeyValue</code></td><td></td></tr><tr><td id='variant.IndexOptionsConflict'><a class='stability Unmarked' title='No stability level'></a><code>IndexOptionsConflict</code></td><td></td></tr><tr><td id='variant.IndexKeySpecsConflict'><a class='stability Unmarked' title='No stability level'></a><code>IndexKeySpecsConflict</code></td><td></td></tr><tr><td id='variant.CannotSplit'><a class='stability Unmarked' title='No stability level'></a><code>CannotSplit</code></td><td></td></tr><tr><td id='variant.SplitFailed'><a class='stability Unmarked' title='No stability level'></a><code>SplitFailed</code></td><td></td></tr><tr><td id='variant.NetworkTimeout'><a class='stability Unmarked' title='No stability level'></a><code>NetworkTimeout</code></td><td></td></tr><tr><td id='variant.CallbackCanceled'><a class='stability Unmarked' title='No stability level'></a><code>CallbackCanceled</code></td><td></td></tr><tr><td id='variant.ShutdownInProgress'><a class='stability Unmarked' title='No stability level'></a><code>ShutdownInProgress</code></td><td></td></tr><tr><td id='variant.SecondaryAheadOfPrimary'><a class='stability Unmarked' title='No stability level'></a><code>SecondaryAheadOfPrimary</code></td><td></td></tr><tr><td id='variant.InvalidReplicaSetConfig'><a class='stability Unmarked' title='No stability level'></a><code>InvalidReplicaSetConfig</code></td><td></td></tr><tr><td id='variant.NotYetInitialized'><a class='stability Unmarked' title='No stability level'></a><code>NotYetInitialized</code></td><td></td></tr><tr><td id='variant.NotSecondary'><a class='stability Unmarked' title='No stability level'></a><code>NotSecondary</code></td><td></td></tr><tr><td id='variant.OperationFailed'><a class='stability Unmarked' title='No stability level'></a><code>OperationFailed</code></td><td></td></tr><tr><td id='variant.NoProjectionFound'><a class='stability Unmarked' title='No stability level'></a><code>NoProjectionFound</code></td><td></td></tr><tr><td id='variant.DBPathInUse'><a class='stability Unmarked' title='No stability level'></a><code>DBPathInUse</code></td><td></td></tr><tr><td id='variant.WriteConcernNotDefined'><a class='stability Unmarked' title='No stability level'></a><code>WriteConcernNotDefined</code></td><td></td></tr><tr><td id='variant.CannotSatisfyWriteConcern'><a class='stability Unmarked' title='No stability level'></a><code>CannotSatisfyWriteConcern</code></td><td></td></tr><tr><td id='variant.OutdatedClient'><a class='stability Unmarked' title='No stability level'></a><code>OutdatedClient</code></td><td></td></tr><tr><td id='variant.IncompatibleAuditMetadata'><a class='stability Unmarked' title='No stability level'></a><code>IncompatibleAuditMetadata</code></td><td></td></tr><tr><td id='variant.NewReplicaSetConfigurationIncompatible'><a class='stability Unmarked' title='No stability level'></a><code>NewReplicaSetConfigurationIncompatible</code></td><td></td></tr><tr><td id='variant.NodeNotElectable'><a class='stability Unmarked' title='No stability level'></a><code>NodeNotElectable</code></td><td></td></tr><tr><td id='variant.IncompatibleShardingMetadata'><a class='stability Unmarked' title='No stability level'></a><code>IncompatibleShardingMetadata</code></td><td></td></tr><tr><td id='variant.DistributedClockSkewed'><a class='stability Unmarked' title='No stability level'></a><code>DistributedClockSkewed</code></td><td></td></tr><tr><td id='variant.LockFailed'><a class='stability Unmarked' title='No stability level'></a><code>LockFailed</code></td><td></td></tr><tr><td id='variant.InconsistentReplicaSetNames'><a class='stability Unmarked' title='No stability level'></a><code>InconsistentReplicaSetNames</code></td><td></td></tr><tr><td id='variant.ConfigurationInProgress'><a class='stability Unmarked' title='No stability level'></a><code>ConfigurationInProgress</code></td><td></td></tr><tr><td id='variant.CannotInitializeNodeWithData'><a class='stability Unmarked' title='No stability level'></a><code>CannotInitializeNodeWithData</code></td><td></td></tr><tr><td id='variant.NotExactValueField'><a class='stability Unmarked' title='No stability level'></a><code>NotExactValueField</code></td><td></td></tr><tr><td id='variant.WriteConflict'><a class='stability Unmarked' title='No stability level'></a><code>WriteConflict</code></td><td></td></tr><tr><td id='variant.InitialSyncFailure'><a class='stability Unmarked' title='No stability level'></a><code>InitialSyncFailure</code></td><td></td></tr><tr><td id='variant.InitialSyncOplogSourceMissing'><a class='stability Unmarked' title='No stability level'></a><code>InitialSyncOplogSourceMissing</code></td><td></td></tr><tr><td id='variant.CommandNotSupported'><a class='stability Unmarked' title='No stability level'></a><code>CommandNotSupported</code></td><td></td></tr><tr><td id='variant.DocTooLargeForCapped'><a class='stability Unmarked' title='No stability level'></a><code>DocTooLargeForCapped</code></td><td></td></tr><tr><td id='variant.ConflictingOperationInProgress'><a class='stability Unmarked' title='No stability level'></a><code>ConflictingOperationInProgress</code></td><td></td></tr><tr><td id='variant.NamespaceNotSharded'><a class='stability Unmarked' title='No stability level'></a><code>NamespaceNotSharded</code></td><td></td></tr><tr><td id='variant.InvalidSyncSource'><a class='stability Unmarked' title='No stability level'></a><code>InvalidSyncSource</code></td><td></td></tr><tr><td id='variant.OplogStartMissing'><a class='stability Unmarked' title='No stability level'></a><code>OplogStartMissing</code></td><td></td></tr><tr><td id='variant.DocumentValidationFailure'><a class='stability Unmarked' title='No stability level'></a><code>DocumentValidationFailure</code></td><td></td></tr><tr><td id='variant.OBSOLETE_ReadAfterOptimeTimeout'><a class='stability Unmarked' title='No stability level'></a><code>OBSOLETE_ReadAfterOptimeTimeout</code></td><td></td></tr><tr><td id='variant.NotAReplicaSet'><a class='stability Unmarked' title='No stability level'></a><code>NotAReplicaSet</code></td><td></td></tr><tr><td id='variant.IncompatibleElectionProtocol'><a class='stability Unmarked' title='No stability level'></a><code>IncompatibleElectionProtocol</code></td><td></td></tr><tr><td id='variant.CommandFailed'><a class='stability Unmarked' title='No stability level'></a><code>CommandFailed</code></td><td></td></tr><tr><td id='variant.RPCProtocolNegotiationFailed'><a class='stability Unmarked' title='No stability level'></a><code>RPCProtocolNegotiationFailed</code></td><td></td></tr><tr><td id='variant.UnrecoverableRollbackError'><a class='stability Unmarked' title='No stability level'></a><code>UnrecoverableRollbackError</code></td><td></td></tr><tr><td id='variant.LockNotFound'><a class='stability Unmarked' title='No stability level'></a><code>LockNotFound</code></td><td></td></tr><tr><td id='variant.LockStateChangeFailed'><a class='stability Unmarked' title='No stability level'></a><code>LockStateChangeFailed</code></td><td></td></tr><tr><td id='variant.SymbolNotFound'><a class='stability Unmarked' title='No stability level'></a><code>SymbolNotFound</code></td><td></td></tr><tr><td id='variant.RLPInitializationFailed'><a class='stability Unmarked' title='No stability level'></a><code>RLPInitializationFailed</code></td><td></td></tr><tr><td id='variant.ConfigServersInconsistent'><a class='stability Unmarked' title='No stability level'></a><code>ConfigServersInconsistent</code></td><td></td></tr><tr><td id='variant.FailedToSatisfyReadPreference'><a class='stability Unmarked' title='No stability level'></a><code>FailedToSatisfyReadPreference</code></td><td></td></tr><tr><td id='variant.XXX_TEMP_NAME_ReadCommittedCurrentlyUnavailable'><a class='stability Unmarked' title='No stability level'></a><code>XXX_TEMP_NAME_ReadCommittedCurrentlyUnavailable</code></td><td></td></tr><tr><td id='variant.StaleTerm'><a class='stability Unmarked' title='No stability level'></a><code>StaleTerm</code></td><td></td></tr><tr><td id='variant.CappedPositionLost'><a class='stability Unmarked' title='No stability level'></a><code>CappedPositionLost</code></td><td></td></tr><tr><td id='variant.IncompatibleShardingConfigVersion'><a class='stability Unmarked' title='No stability level'></a><code>IncompatibleShardingConfigVersion</code></td><td></td></tr><tr><td id='variant.RemoteOplogStale'><a class='stability Unmarked' title='No stability level'></a><code>RemoteOplogStale</code></td><td></td></tr><tr><td id='variant.JSInterpreterFailure'><a class='stability Unmarked' title='No stability level'></a><code>JSInterpreterFailure</code></td><td></td></tr><tr><td id='variant.NotMaster'><a class='stability Unmarked' title='No stability level'></a><code>NotMaster</code></td><td></td></tr><tr><td id='variant.DuplicateKey'><a class='stability Unmarked' title='No stability level'></a><code>DuplicateKey</code></td><td></td></tr><tr><td id='variant.InterruptedAtShutdown'><a class='stability Unmarked' title='No stability level'></a><code>InterruptedAtShutdown</code></td><td></td></tr><tr><td id='variant.Interrupted'><a class='stability Unmarked' title='No stability level'></a><code>Interrupted</code></td><td></td></tr><tr><td id='variant.BackgroundOperationInProgressForDatabase'><a class='stability Unmarked' title='No stability level'></a><code>BackgroundOperationInProgressForDatabase</code></td><td></td></tr><tr><td id='variant.BackgroundOperationInProgressForNamespace'><a class='stability Unmarked' title='No stability level'></a><code>BackgroundOperationInProgressForNamespace</code></td><td></td></tr><tr><td id='variant.PrepareConfigsFailedCode'><a class='stability Unmarked' title='No stability level'></a><code>PrepareConfigsFailedCode</code></td><td></td></tr><tr><td id='variant.DatabaseDifferCase'><a class='stability Unmarked' title='No stability level'></a><code>DatabaseDifferCase</code></td><td></td></tr><tr><td id='variant.ShardKeyTooBig'><a class='stability Unmarked' title='No stability level'></a><code>ShardKeyTooBig</code></td><td></td></tr><tr><td id='variant.SendStaleConfig'><a class='stability Unmarked' title='No stability level'></a><code>SendStaleConfig</code></td><td></td></tr><tr><td id='variant.NotMasterNoSlaveOkCode'><a class='stability Unmarked' title='No stability level'></a><code>NotMasterNoSlaveOkCode</code></td><td></td></tr><tr><td id='variant.NotMasterOrSecondaryCode'><a class='stability Unmarked' title='No stability level'></a><code>NotMasterOrSecondaryCode</code></td><td></td></tr><tr><td id='variant.OutOfDiskSpace'><a class='stability Unmarked' title='No stability level'></a><code>OutOfDiskSpace</code></td><td></td></tr><tr><td id='variant.KeyTooLong'><a class='stability Unmarked' title='No stability level'></a><code>KeyTooLong</code></td><td></td></tr><tr><td id='variant.MaxError'><a class='stability Unmarked' title='No stability level'></a><code>MaxError</code></td><td></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='enum' href='../../mongodb/error/enum.ErrorCode.html' title='mongodb::error::ErrorCode'>ErrorCode</a></code></h3><div class='impl-items'><h4 id='method.is_network_error' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.is_network_error' class='fnname'>is_network_error</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.is_interruption' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.is_interruption' class='fnname'>is_interruption</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.is_index_creation_error' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.is_index_creation_error' class='fnname'>is_index_creation_error</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='enum' href='../../mongodb/error/enum.ErrorCode.html' title='mongodb::error::ErrorCode'>ErrorCode</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#method.fmt' class='fnname'>fmt</a>(&amp;self, fmt: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='enum' href='../../mongodb/error/enum.ErrorCode.html' title='mongodb::error::ErrorCode'>ErrorCode</a></code></h3><div class='impl-items'></div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../../mongodb/error/enum.ErrorCode.html' title='mongodb::error::ErrorCode'>ErrorCode</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../mongodb/error/enum.ErrorCode.html' title='mongodb::error::ErrorCode'>ErrorCode</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../mongodb/error/enum.ErrorCode.html' title='mongodb::error::ErrorCode'>ErrorCode</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../mongodb/error/enum.ErrorCode.html' title='mongodb::error::ErrorCode'>ErrorCode</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "mongodb";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

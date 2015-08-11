@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FileCursor","A default cursor wrapper that maps bson documents into GridFS file representations."],["StoreInner","Interfaces with a GridFS instance."]],"mod":[["file","Lower-level file and chunk representations in GridFS."]],"trait":[["ThreadedStore",""]],"type":[["Store","Alias for a thread-safe GridFS instance."]]});

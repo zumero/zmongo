@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["float",""],["signed_int",""],["unsigned_int",""]],"trait":[["Separatable","Used for numbers that can be printed with separators for the thousands places."]],"macro":[["separated_float!",""],["separated_int!",""],["separated_uint!",""]]});
