@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["EncoderResult","Alias for `Result<T, EncoderError>`."]],"fn":[["encode_document","Attempt to encode a `Document` into a byte stream."]],"enum":[["EncoderError","Possible errors that can arise during encoding."]]});

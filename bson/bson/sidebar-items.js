@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Bson","Possible BSON value types."]],"type":[["Array","Alias for `Vec<Bson>`."],["Document","Alias for `OrderedDocument`."]]});

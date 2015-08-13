@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Collection","Interfaces with a MongoDB collection."]],"mod":[["error","Write errors for collection-level operations."],["options","Options for collection-level operations."],["results","Results for collection-level operations."]]});

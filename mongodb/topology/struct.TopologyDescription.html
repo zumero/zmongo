@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `TopologyDescription` struct in crate `mongodb`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, TopologyDescription">
+
+    <title>mongodb::topology::TopologyDescription - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'><a href='../index.html'>mongodb</a>::<wbr><a href='index.html'>topology</a></p><script>window.sidebarCurrent = {name: 'TopologyDescription', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>mongodb</a>::<wbr><a href='index.html'>topology</a>::<wbr><a class='struct' href=''>TopologyDescription</a><wbr></span><span class='out-of-band'><span id='render-detail'>
+            <a id="collapse-all" href="#">[-]</a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-30192' href='../../src/mongodb/topology/mod.rs.html#41-63'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct TopologyDescription {
+    pub topology_type: <a class='enum' href='../../mongodb/topology/enum.TopologyType.html' title='mongodb::topology::TopologyType'>TopologyType</a>,
+    pub set_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    pub servers: <a class='struct' href='http://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html' title='std::collections::hash::map::HashMap'>HashMap</a>&lt;<a class='struct' href='../../mongodb/connstring/struct.Host.html' title='mongodb::connstring::Host'>Host</a>, <a class='struct' href='../../mongodb/topology/server/struct.Server.html' title='mongodb::topology::server::Server'>Server</a>&gt;,
+    pub heartbeat_frequency_ms: <a href='http://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>,
+    pub local_threshold_ms: <a href='http://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>,
+    pub server_selection_timeout_ms: <a href='http://doc.rust-lang.org/nightly/std/primitive.i64.html'>i64</a>,
+    // some fields omitted
+}</pre><div class='docblock'><p>Topology information gathered from server set monitoring.</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr><td id='structfield.topology_type'><a class='stability Unmarked' title='No stability level'></a><code>topology_type</code></td><td></td></tr><tr><td id='structfield.set_name'><a class='stability Unmarked' title='No stability level'></a><code>set_name</code></td><td><div class='docblock'><p>The set name for a replica set topology. If the topology
+is not a replica set, this will be an empty string.</p>
+</div></td></tr><tr><td id='structfield.servers'><a class='stability Unmarked' title='No stability level'></a><code>servers</code></td><td><div class='docblock'><p>Known servers within the topology.</p>
+</div></td></tr><tr><td id='structfield.heartbeat_frequency_ms'><a class='stability Unmarked' title='No stability level'></a><code>heartbeat_frequency_ms</code></td><td><div class='docblock'><p>The server connection health check frequency.
+The default is 10 seconds.</p>
+</div></td></tr><tr><td id='structfield.local_threshold_ms'><a class='stability Unmarked' title='No stability level'></a><code>local_threshold_ms</code></td><td><div class='docblock'><p>The size of the latency window for selecting suitable servers.
+The default is 15 milliseconds.</p>
+</div></td></tr><tr><td id='structfield.server_selection_timeout_ms'><a class='stability Unmarked' title='No stability level'></a><code>server_selection_timeout_ms</code></td><td><div class='docblock'><p>This defines how long to block for server selection before
+returning an error. The default is 30 seconds.</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><a class='stability Unmarked' title='No stability level'></a><code>impl <a class='struct' href='../../mongodb/topology/struct.TopologyDescription.html' title='mongodb::topology::TopologyDescription'>TopologyDescription</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../mongodb/topology/struct.TopologyDescription.html' title='mongodb::topology::TopologyDescription'>TopologyDescription</a></code></h4>
+<div class='docblock'><p>Returns a default, unknown topology description.</p>
+</div><h4 id='method.acquire_stream' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.acquire_stream' class='fnname'>acquire_stream</a>(&amp;self, read_preference: &amp;<a class='struct' href='../../mongodb/common/struct.ReadPreference.html' title='mongodb::common::ReadPreference'>ReadPreference</a>) -&gt; <a class='type' href='../../mongodb/error/type.Result.html' title='mongodb::error::Result'>Result</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='../../mongodb/pool/struct.PooledStream.html' title='mongodb::pool::PooledStream'>PooledStream</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>)</a>&gt;</code></h4>
+<div class='docblock'><p>Returns a server stream for read operations.</p>
+</div><h4 id='method.acquire_write_stream' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.acquire_write_stream' class='fnname'>acquire_write_stream</a>(&amp;self) -&gt; <a class='type' href='../../mongodb/error/type.Result.html' title='mongodb::error::Result'>Result</a>&lt;<a class='struct' href='../../mongodb/pool/struct.PooledStream.html' title='mongodb::pool::PooledStream'>PooledStream</a>&gt;</code></h4>
+<div class='docblock'><p>Returns a server stream for write operations.</p>
+</div><h4 id='method.filter_hosts' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.filter_hosts' class='fnname'>filter_hosts</a>(&amp;self, hosts: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../mongodb/connstring/struct.Host.html' title='mongodb::connstring::Host'>Host</a>&gt;, read_preference: &amp;<a class='struct' href='../../mongodb/common/struct.ReadPreference.html' title='mongodb::common::ReadPreference'>ReadPreference</a>)</code></h4>
+<div class='docblock'><p>Filters a given set of hosts based on the provided read preference tag sets.</p>
+</div><h4 id='method.filter_latency_hosts' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.filter_latency_hosts' class='fnname'>filter_latency_hosts</a>(&amp;self, hosts: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../mongodb/connstring/struct.Host.html' title='mongodb::connstring::Host'>Host</a>&gt;)</code></h4>
+<div class='docblock'><p>Filter out provided hosts by creating a latency window around
+the server with the lowest round-trip time.</p>
+</div><h4 id='method.choose_write_hosts' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.choose_write_hosts' class='fnname'>choose_write_hosts</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../mongodb/connstring/struct.Host.html' title='mongodb::connstring::Host'>Host</a>&gt;, <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>)</a></code></h4>
+<div class='docblock'><p>Returns suitable servers for write operations and whether to take a random element.</p>
+</div><h4 id='method.choose_hosts' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.choose_hosts' class='fnname'>choose_hosts</a>(&amp;self, read_preference: &amp;<a class='struct' href='../../mongodb/common/struct.ReadPreference.html' title='mongodb::common::ReadPreference'>ReadPreference</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../mongodb/connstring/struct.Host.html' title='mongodb::connstring::Host'>Host</a>&gt;, <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>)</a></code></h4>
+<div class='docblock'><p>Returns suitable servers for read operations and whether to take a random element.</p>
+</div><h4 id='method.update_without_monitor' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.update_without_monitor' class='fnname'>update_without_monitor</a>(&amp;mut self, host: <a class='struct' href='../../mongodb/connstring/struct.Host.html' title='mongodb::connstring::Host'>Host</a>, description: <a class='struct' href='../../mongodb/topology/server/struct.ServerDescription.html' title='mongodb::topology::server::ServerDescription'>ServerDescription</a>, client: <a class='type' href='../../mongodb/type.Client.html' title='mongodb::Client'>Client</a>, top_arc: <a class='struct' href='http://doc.rust-lang.org/nightly/alloc/arc/struct.Arc.html' title='alloc::arc::Arc'>Arc</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/std/sync/rwlock/struct.RwLock.html' title='std::sync::rwlock::RwLock'>RwLock</a>&lt;<a class='struct' href='../../mongodb/topology/struct.TopologyDescription.html' title='mongodb::topology::TopologyDescription'>TopologyDescription</a>&gt;&gt;)</code></h4>
+<div class='docblock'><p>Update the topology description, but don&#39;t start any monitors for new servers.</p>
+</div><h4 id='method.update' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.update' class='fnname'>update</a>(&amp;mut self, host: <a class='struct' href='../../mongodb/connstring/struct.Host.html' title='mongodb::connstring::Host'>Host</a>, description: <a class='struct' href='../../mongodb/topology/server/struct.ServerDescription.html' title='mongodb::topology::server::ServerDescription'>ServerDescription</a>, client: <a class='type' href='../../mongodb/type.Client.html' title='mongodb::Client'>Client</a>, top_arc: <a class='struct' href='http://doc.rust-lang.org/nightly/alloc/arc/struct.Arc.html' title='alloc::arc::Arc'>Arc</a>&lt;<a class='struct' href='http://doc.rust-lang.org/nightly/std/sync/rwlock/struct.RwLock.html' title='std::sync::rwlock::RwLock'>RwLock</a>&lt;<a class='struct' href='../../mongodb/topology/struct.TopologyDescription.html' title='mongodb::topology::TopologyDescription'>TopologyDescription</a>&gt;&gt;)</code></h4>
+<div class='docblock'><p>Updates the topology description based on an updated server description.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><a class='stability Stable' title='Stable'></a><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../mongodb/topology/struct.TopologyDescription.html' title='mongodb::topology::TopologyDescription'>TopologyDescription</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../mongodb/topology/struct.TopologyDescription.html' title='mongodb::topology::TopologyDescription'>TopologyDescription</a></code></h4>
+<h4 id='method.clone_from' class='method'><a class='stability Stable' title='Stable'></a><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "mongodb";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>

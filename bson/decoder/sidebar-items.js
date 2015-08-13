@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["DecoderResult","Alias for `Result<T, DecoderError>`."]],"enum":[["DecoderError","Possible errors that can arise during decoding."]],"fn":[["decode_document","Attempt to decode a `Document` from a byte stream."]]});
