@@ -22,7 +22,7 @@ rustc-serialize = "0.3"
 scan_fmt = "0.1.0"
 separator = "0.3.0"
 textnonce = "0.1.1"
-time = "0.1"
+time = "0.3"
 bufstream = "0.1.1"
 
 [dev-dependencies]
